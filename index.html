@@ -1,15 +1,12 @@
-```html
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PE | Project Eramdam - Manipur Streetwear</title>
-    <!-- Tailwind CSS for Layout -->
+    <!-- CSS Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Meetei Mayek & Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Meetei+Mayek:wght@100..900&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
@@ -17,7 +14,7 @@
             --pe-black: #000000;
             --pe-white: #ffffff;
             --pe-gray: #666666;
-            --pe-accent: #ff3b30; /* Gentle Red */
+            --pe-red: #FF3B30; 
         }
 
         body {
@@ -27,20 +24,23 @@
             overflow-x: hidden;
             touch-action: pan-y;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
-        .font-mayek {
-            font-family: 'Noto Sans Meetei Mayek', sans-serif;
+        .font-mayek { font-family: 'Noto Sans Meetei Mayek', sans-serif; }
+
+        /* Typography Visual Balance */
+        .btn-label-mayek {
+            display: inline-block;
+            transform: scale(1.1);
+            margin-right: 0.6rem;
+            color: var(--pe-red);
+            font-weight: 900;
         }
 
         /* Animations */
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-            animation: marquee 25s linear infinite;
-        }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { animation: marquee 25s linear infinite; }
 
         @keyframes gentle-float {
             0% { opacity: 0; transform: translate(0, 0) scale(0.8) rotate(0deg); }
@@ -50,74 +50,59 @@
         .particle {
             position: fixed;
             pointer-events: none;
-            z-index: 60;
+            z-index: 150;
             font-weight: 900;
-            animation: gentle-float 1.5s ease-out forwards;
+            animation: gentle-float 1.2s ease-out forwards;
         }
 
-        /* Typewriter Cursor */
-        .cursor-blink {
-            border-right: 2px solid white;
-            animation: blink 0.7s infinite;
-        }
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
+        /* Design Tokens */
+        .glass { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .tactical-border { border: 1px solid rgba(255, 255, 255, 0.1); }
+        .no-scroll { overflow: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* Glassmorphism */
-        .glass {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
+        /* Modal Dynamics */
+        #product-modal { transition: opacity 0.3s ease, visibility 0.3s; }
+        .modal-content { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        .tactical-border {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .manifesto-gradient {
+            background: linear-gradient(180deg, #000 0%, #080808 100%);
         }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; }
     </style>
 </head>
 <body class="bg-black text-white">
 
-    <!-- 1. MATRIX LOADER -->
-    <div id="loader" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center overflow-hidden">
-        <canvas id="matrix-canvas" class="absolute inset-0"></canvas>
+    <!-- MATRIX LOADER -->
+    <div id="loader" class="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center overflow-hidden">
+        <canvas id="matrix-canvas" class="absolute inset-0 opacity-40"></canvas>
         <div id="typewriter-container" class="relative z-10 text-center hidden px-6">
             <h2 id="typewriter-main" class="text-5xl md:text-8xl font-mayek font-black mb-6 tracking-widest text-white leading-none"></h2>
             <p id="typewriter-sub" class="text-xl md:text-3xl font-light tracking-[0.8em] text-gray-500 uppercase"></p>
         </div>
     </div>
 
-    <!-- 2. NAVIGATION -->
+    <!-- NAVIGATION -->
     <nav id="navbar" class="fixed w-full z-50 transition-all duration-500 py-8 bg-transparent">
         <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-6">
                 <span class="text-3xl md:text-4xl font-mayek font-black tracking-widest leading-none">ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ</span>
                 <span class="text-[12px] md:text-sm font-black tracking-tighter italic text-gray-500 uppercase leading-none">PROJECT ERAMDAM</span>
             </div>
-            
             <div class="hidden lg:flex items-center space-x-12">
                 <a href="#drop" class="flex flex-col items-start group">
-                    <span class="font-mayek text-xl font-black group-hover:text-white text-white/80 leading-none">ꯗ ꯗ꯭ꯔꯣꯄ</span>
+                    <span class="font-mayek text-xl font-black text-white/80 leading-none">ꯗ ꯗ꯭ꯔꯣꯄ</span>
                     <span class="text-[10px] font-black text-gray-500 tracking-[0.2em]">DROP</span>
                 </a>
-                <a href="#process" class="flex flex-col items-start group">
-                    <span class="font-mayek text-xl font-black group-hover:text-white text-white/80 leading-none">ꯃꯔꯨ</span>
-                    <span class="text-[10px] font-black text-gray-500 tracking-[0.2em]">ROOTS</span>
+                <a href="#manifesto" class="flex flex-col items-start group">
+                    <span class="font-mayek text-xl font-black text-white/80 leading-none">ꯍꯧꯔꯀꯐꯝ</span>
+                    <span class="text-[10px] font-black text-gray-500 tracking-[0.2em]">MANIFESTO</span>
                 </a>
             </div>
-
             <div class="flex items-center space-x-6">
                 <button onclick="openWhatsApp()" class="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] border-b border-white pb-1">
-                    CONNECT
+                    <span class="font-mayek btn-label-mayek">ꯄꯥꯎ ꯐꯥꯎꯅꯕꯤꯌꯨ</span> CONNECT
                 </button>
-                <button class="md:hidden" onclick="toggleMenu()">
-                    <i data-lucide="menu" id="menu-icon"></i>
-                </button>
+                <button class="md:hidden p-2" onclick="toggleMenu()"><i data-lucide="menu"></i></button>
             </div>
         </div>
     </nav>
@@ -128,48 +113,31 @@
             <div class="font-mayek text-5xl font-black mb-2 tracking-widest">ꯗ ꯗ꯭ꯔꯣꯄ</div>
             <div class="text-sm tracking-[0.5em] text-gray-500 uppercase font-black">THE DROP</div>
         </a>
-        <a href="#process" class="text-center group" onclick="toggleMenu()">
-            <div class="font-mayek text-5xl font-black mb-2 tracking-widest">ꯃꯔꯨ</div>
-            <div class="text-sm tracking-[0.5em] text-gray-500 uppercase font-black">OUR STORY</div>
+        <a href="#manifesto" class="text-center group" onclick="toggleMenu()">
+            <div class="font-mayek text-5xl font-black mb-2 tracking-widest">ꯍꯧꯔꯀꯐꯝ</div>
+            <div class="text-sm tracking-[0.5em] text-gray-500 uppercase font-black">MANIFESTO</div>
         </a>
-        <button onclick="toggleMenu()" class="mt-12 text-white/40"><i data-lucide="x" size="64"></i></button>
-    </div>
-
-    <!-- BACKGROUND DECORATION -->
-    <div class="fixed inset-0 pointer-events-none opacity-[0.04] select-none z-0">
-        <div class="font-mayek absolute top-[5%] left-[-10%] text-[30rem] leading-none rotate-[-15deg]">ꯄꯅ</div>
-        <div class="font-mayek absolute bottom-[10%] right-[-15%] text-[35rem] leading-none rotate-[10deg]">ꯃꯄ</div>
-        <div class="font-mayek absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[45rem] leading-none">ꯏꯔꯝꯗꯝ</div>
+        <button onclick="toggleMenu()" class="mt-12 text-white/40"><i data-lucide="x" size="48"></i></button>
     </div>
 
     <!-- HERO SECTION -->
     <section class="relative h-[100vh] flex items-center justify-center overflow-hidden">
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&q=80&w=1920" 
-                 class="w-full h-full object-cover opacity-60 grayscale contrast-[1.1]" alt="Manipur">
+            <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&q=80&w=1920" class="w-full h-full object-cover opacity-60 grayscale contrast-[1.1]" alt="Hero">
             <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
         </div>
-
         <div class="relative z-10 text-center px-6 mt-20">
-            <div class="flex items-center justify-center gap-6 mb-10">
-                <i data-lucide="radar" class="text-white/40 w-4 h-4"></i>
-                <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.8em] text-white/70">
-                    MANIPUR <span class="mx-2 opacity-30">•</span> LIMITED DROP
-                </p>
-                <i data-lucide="radar" class="text-white/40 w-4 h-4"></i>
+            <div class="flex items-center justify-center gap-6 mb-10 opacity-60">
+                <i data-lucide="crosshair" class="w-4 h-4"></i>
+                <p class="text-[10px] md:text-xs font-black uppercase tracking-[0.8em]">MANIPUR • LIMITED DROP</p>
+                <i data-lucide="crosshair" class="w-4 h-4"></i>
             </div>
-            
             <div class="mb-14 space-y-4">
-                 <h1 class="font-mayek text-7xl md:text-[11rem] font-black tracking-widest leading-none drop-shadow-2xl">
-                  ꯃꯔꯨ ꯁꯦꯠꯂꯨ
-                </h1>
-                <h2 class="text-4xl md:text-[7rem] font-black tracking-tighter uppercase italic opacity-70 leading-none">
-                  WEAR YOUR ROOTS
-                </h2>
+                 <h1 class="font-mayek text-7xl md:text-[11rem] font-black tracking-widest leading-none drop-shadow-2xl">ꯃꯔꯨ ꯁꯦꯠꯂꯨ</h1>
+                 <h2 class="text-4xl md:text-[7rem] font-black tracking-tighter uppercase italic opacity-70 leading-none">WEAR YOUR ROOTS</h2>
             </div>
-            
             <button onclick="openWhatsApp()" class="group relative inline-flex items-center justify-center gap-4 bg-white text-black px-14 py-7 font-black uppercase tracking-[0.4em] text-xs hover:bg-neutral-200 transition-all active:scale-95">
-                <i data-lucide="shopping-bag" class="w-5 h-5"></i> ORDER NOW
+                <span class="font-mayek btn-label-mayek">ꯍꯧꯖꯤꯛ ꯑꯣꯔꯗꯔ ꯇꯧꯕꯤꯌꯨ</span> ORDER NOW
             </button>
         </div>
     </section>
@@ -177,16 +145,12 @@
     <!-- TICKER -->
     <div class="bg-white text-black py-6 overflow-hidden whitespace-nowrap border-y border-white/10 z-20 relative">
         <div class="flex animate-marquee space-x-12 items-center">
-            <div class="flex space-x-12 items-center">
-                <span class="font-mayek text-[16px] font-black uppercase tracking-[0.6em] flex items-center gap-10">
-                   ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="target" class="w-5 h-5"></i>
-                   ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="target" class="w-5 h-5"></i>
-                </span>
-                <span class="font-mayek text-[16px] font-black uppercase tracking-[0.6em] flex items-center gap-10">
-                    ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="target" class="w-5 h-5"></i>
-                    ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="target" class="w-5 h-5"></i>
-                 </span>
-            </div>
+            <span class="font-mayek text-[16px] font-black uppercase tracking-[0.6em] flex items-center gap-10">
+               ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="shield-check" class="w-5 h-5"></i> ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </span>
+            <span class="font-mayek text-[16px] font-black uppercase tracking-[0.6em] flex items-center gap-10">
+               ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="shield-check" class="w-5 h-5"></i> ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ PROJECT ERAMDAM <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </span>
         </div>
     </div>
 
@@ -196,81 +160,82 @@
             <div class="font-mayek text-4xl font-black mb-2 tracking-widest leading-none">ꯗ ꯗ꯭ꯔꯣꯄ</div>
             <h2 class="text-4xl md:text-[4.5rem] font-black tracking-tighter uppercase italic leading-none">CURRENT DROP</h2>
         </div>
+        <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            <!-- Dynamic Injection -->
+        </div>
+    </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24 md:gap-12">
-            <!-- Product 1 -->
-            <div class="group cursor-pointer">
-                <div class="aspect-[3/4] overflow-hidden bg-neutral-900 mb-10 relative border border-white/10 p-1">
-                    <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=800" 
-                         class="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105 transition-all duration-1000 ease-in-out" alt="Product">
-                    <div class="absolute bottom-6 left-6 mix-blend-difference">
-                        <div class="text-[11px] font-black uppercase tracking-[0.2em] border-2 border-white px-3 py-2 flex items-center gap-2">
-                            <i data-lucide="flame" class="w-4 h-4"></i> UNIT: 01
-                        </div>
-                    </div>
+    <!-- MANIFESTO SECTION -->
+    <section id="manifesto" class="py-32 px-6 manifesto-gradient overflow-hidden border-y border-white/5 relative">
+        <div class="font-mayek absolute top-1/2 left-[-5%] -translate-y-1/2 text-[40rem] font-black opacity-[0.02] select-none pointer-events-none">ꯀ</div>
+        
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20 relative z-10">
+            <div class="w-full lg:w-1/2">
+                <div class="mb-12">
+                    <h3 class="font-mayek text-4xl md:text-6xl font-black mb-4 tracking-widest leading-none">ꯍꯧꯔꯀꯐꯝ</h3>
+                    <h4 class="text-2xl md:text-4xl font-black italic uppercase tracking-tighter text-gray-500">ORIGIN MANIFESTO</h4>
                 </div>
-                <div class="space-y-6">
-                    <div class="flex flex-col gap-3">
-                        <h4 class="font-mayek text-3xl md:text-4xl font-black tracking-widest uppercase leading-none">ꯀꯪꯂꯥ ꯁꯥ ꯇꯤ-ꯁꯔꯠ</h4>
-                        <h5 class="text-[13px] font-black text-gray-500 uppercase tracking-widest italic leading-none">KANGLA SHA T-SHIRT</h5>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-white/10 pt-8">
-                        <span class="text-4xl font-black italic tracking-tighter leading-none">₹799</span>
-                        <button onclick="openWhatsApp('Kangla Sha T-Shirt')" class="bg-white text-black px-10 py-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-all">
-                            <i data-lucide="message-square" class="w-4 h-4"></i> ORDER
-                        </button>
+                
+                <div class="space-y-10 text-lg md:text-xl font-light leading-relaxed text-gray-300 italic border-l-2 border-white/10 pl-8">
+                    <p>Before trends, there was a land of strength, stories, and legacy — <span class="text-white font-bold tracking-widest">KANGLEIPAK</span>.</p>
+                    <p>A place where culture lived in the heart of the people, from peaks to valley, passed from one generation to the next. We create from that same spirit — honoring what came before us while shaping what comes next.</p>
+                    <p>We reimagine heritage into something wearable, meaningful, and alive in the present. Rooted in memory, identity, and quiet pride.</p>
+                    <div class="pt-6">
+                        <p class="font-black uppercase tracking-[0.5em] text-white">Wear Your Roots.</p>
                     </div>
                 </div>
             </div>
-            <!-- More products can be added here with same structure -->
-            <div class="group cursor-pointer">
-                <div class="aspect-[3/4] overflow-hidden bg-neutral-900 mb-10 relative border border-white/10 p-1">
-                    <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800" 
-                         class="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105 transition-all duration-1000 ease-in-out" alt="Product">
-                    <div class="absolute bottom-6 left-6 mix-blend-difference">
-                        <div class="text-[11px] font-black uppercase tracking-[0.2em] border-2 border-white px-3 py-2 flex items-center gap-2">
-                            <i data-lucide="flame" class="w-4 h-4"></i> UNIT: 02
-                        </div>
-                    </div>
+            
+            <div class="w-full lg:w-1/2 grid grid-cols-2 gap-4">
+                <div class="aspect-[3/4] tactical-border overflow-hidden grayscale">
+                    <img src="https://images.unsplash.com/photo-1554568218-0f1715e72254?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover opacity-60" alt="Culture 1">
                 </div>
-                <div class="space-y-6">
-                    <div class="flex flex-col gap-3">
-                        <h4 class="font-mayek text-3xl md:text-4xl font-black tracking-widest uppercase leading-none">ꯀꯪꯂꯥ ꯁꯥ ꯍꯨꯗꯤ</h4>
-                        <h5 class="text-[13px] font-black text-gray-500 uppercase tracking-widest italic leading-none">KANGLA SHA HOODIE</h5>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-white/10 pt-8">
-                        <span class="text-4xl font-black italic tracking-tighter leading-none">₹1,399</span>
-                        <button onclick="openWhatsApp('Kangla Sha Hoodie')" class="bg-white text-black px-10 py-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-all">
-                            <i data-lucide="message-square" class="w-4 h-4"></i> ORDER
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="group cursor-pointer">
-                <div class="aspect-[3/4] overflow-hidden bg-neutral-900 mb-10 relative border border-white/10 p-1">
-                    <img src="https://images.unsplash.com/photo-1576566582149-4347729df66f?auto=format&fit=crop&q=80&w=800" 
-                         class="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:scale-105 transition-all duration-1000 ease-in-out" alt="Product">
-                    <div class="absolute bottom-6 left-6 mix-blend-difference">
-                        <div class="text-[11px] font-black uppercase tracking-[0.2em] border-2 border-white px-3 py-2 flex items-center gap-2">
-                            <i data-lucide="flame" class="w-4 h-4"></i> UNIT: 03
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-6">
-                    <div class="flex flex-col gap-3">
-                        <h4 class="font-mayek text-3xl md:text-4xl font-black tracking-widest uppercase leading-none">ꯐꯨꯡꯒꯥ ꯋꯥꯔꯤ ꯇꯤ-ꯁꯔꯠ</h4>
-                        <h5 class="text-[13px] font-black text-gray-500 uppercase tracking-widest italic leading-none">PHUNGA WARI T-SHIRT</h5>
-                    </div>
-                    <div class="flex items-center justify-between border-t border-white/10 pt-8">
-                        <span class="text-4xl font-black italic tracking-tighter leading-none">₹899</span>
-                        <button onclick="openWhatsApp('Phunga Wari T-Shirt')" class="bg-white text-black px-10 py-5 flex items-center gap-3 text-[11px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-all">
-                            <i data-lucide="message-square" class="w-4 h-4"></i> ORDER
-                        </button>
-                    </div>
+                <div class="aspect-[3/4] tactical-border overflow-hidden grayscale mt-12">
+                    <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover opacity-60" alt="Culture 2">
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- PRODUCT MODAL -->
+    <div id="product-modal" class="fixed inset-0 z-[110] bg-black invisible opacity-0 flex items-center justify-center p-4 md:p-10">
+        <button onclick="closeModal()" class="absolute top-6 right-6 text-white z-[120] p-4 hover:scale-110 transition-transform"><i data-lucide="x" size="40"></i></button>
+        <div class="modal-content w-full max-w-6xl h-full md:h-[85vh] bg-black tactical-border overflow-hidden flex flex-col md:flex-row translate-y-10">
+            <!-- Gallery -->
+            <div class="relative w-full md:w-3/5 h-1/2 md:h-full bg-neutral-900 overflow-hidden group">
+                <div id="modal-images" class="flex h-full transition-transform duration-500 ease-out"></div>
+                <button onclick="prevImg()" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-black/80 rounded-full border border-white/10"><i data-lucide="chevron-left"></i></button>
+                <button onclick="nextImg()" class="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-black/80 rounded-full border border-white/10"><i data-lucide="chevron-right"></i></button>
+                <div id="image-dots" class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2"></div>
+            </div>
+            <!-- Info -->
+            <div class="w-full md:w-2/5 p-8 md:p-12 overflow-y-auto flex flex-col hide-scrollbar bg-black">
+                <div class="mb-10">
+                    <h3 id="modal-title" class="text-4xl font-black tracking-tighter uppercase italic mb-2"></h3>
+                    <p id="modal-price" class="text-3xl font-light opacity-50 mb-8"></p>
+                    <p id="modal-desc" class="text-gray-400 text-sm leading-relaxed uppercase tracking-widest mb-10"></p>
+                    
+                    <button onclick="toggleSizeChart()" class="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.4em] border-b border-white/20 pb-2 mb-4">
+                        <span class="font-mayek btn-label-mayek">ꯆꯥꯡ</span> SIZE CHART
+                    </button>
+                    <div id="size-chart" class="hidden tactical-border p-4 bg-neutral-900 text-[10px] uppercase tracking-widest">
+                        <table class="w-full text-left font-bold">
+                            <tr class="border-b border-white/10"> <th class="py-2">SIZE</th> <th class="py-2">CHEST</th> <th class="py-2">LENGTH</th> </tr>
+                            <tr class="border-b border-white/5"> <td>S</td> <td>40"</td> <td>27"</td> </tr>
+                            <tr class="border-b border-white/5"> <td>M</td> <td>42"</td> <td>28"</td> </tr>
+                            <tr class="border-b border-white/5"> <td>L</td> <td>44"</td> <td>29"</td> </tr>
+                            <tr> <td>XL</td> <td>46"</td> <td>30"</td> </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-auto">
+                    <button id="modal-buy" class="w-full bg-white text-black py-7 font-black uppercase tracking-[0.4em] text-xs flex items-center justify-center gap-4 hover:bg-neutral-200 transition-all">
+                        <span class="font-mayek btn-label-mayek" style="color:black">ꯋꯥꯇꯁꯑꯦꯞ</span> ORDER ON WHATSAPP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- TACTICAL SPECS GRID -->
     <section class="py-32 px-6 border-y border-white/10 bg-neutral-950/50">
@@ -279,126 +244,25 @@
                 <div class="font-mayek text-4xl font-black tracking-widest leading-none">ꯒ꯭ꯋꯥꯔꯦꯟꯇꯤ</div>
                 <h2 class="text-4xl md:text-[4.5rem] font-black uppercase tracking-tight italic leading-none">QUALITY SPEC</h2>
             </div>
-            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border border-white/10">
-                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all duration-500">
+                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all">
                     <i data-lucide="target" class="w-10 h-10 text-white opacity-40 group-hover:opacity-100 transition-all"></i>
-                    <div class="space-y-3">
-                        <h5 class="font-black text-[13px] tracking-[0.2em] uppercase leading-tight">ꯄ꯭ꯔꯤꯃꯤꯌꯝ PREMIUM</h5>
-                        <p class="text-[11px] text-gray-600 leading-tight uppercase font-bold tracking-[0.2em]">Military grade fabrics</p>
-                    </div>
+                    <h5 class="font-black text-[13px] tracking-[0.2em] uppercase">ꯄ꯭ꯔꯤꯃꯤꯌꯝ PREMIUM</h5>
                 </div>
-                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all duration-500">
+                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all">
                     <i data-lucide="shield" class="w-10 h-10 text-white opacity-40 group-hover:opacity-100 transition-all"></i>
-                    <div class="space-y-3">
-                        <h5 class="font-black text-[13px] tracking-[0.2em] uppercase leading-tight">ꯁꯦꯛꯌꯨꯔ SECURE</h5>
-                        <p class="text-[11px] text-gray-600 leading-tight uppercase font-bold tracking-[0.2em]">Encrypted UPI payment</p>
-                    </div>
+                    <h5 class="font-black text-[13px] tracking-[0.2em] uppercase">ꯁꯦꯛꯌꯨꯔ SECURE</h5>
                 </div>
-                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all duration-500">
+                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all">
                     <i data-lucide="locate" class="w-10 h-10 text-white opacity-40 group-hover:opacity-100 transition-all"></i>
-                    <div class="space-y-3">
-                        <h5 class="font-black text-[13px] tracking-[0.2em] uppercase leading-tight">ꯇ꯭ꯔꯦꯀꯤꯡ TRACKING</h5>
-                        <p class="text-[11px] text-gray-600 leading-tight uppercase font-bold tracking-[0.2em]">Live GPS coordinates</p>
-                    </div>
+                    <h5 class="font-black text-[13px] tracking-[0.2em] uppercase">ꯇ꯭ꯔꯦꯀꯤꯡ TRACKING</h5>
                 </div>
-                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all duration-500">
+                <div class="bg-black p-12 flex flex-col items-center text-center space-y-8 group hover:bg-neutral-900 transition-all">
                     <i data-lucide="zap" class="w-10 h-10 text-white opacity-40 group-hover:opacity-100 transition-all"></i>
-                    <div class="space-y-3">
-                        <h5 class="font-black text-[13px] tracking-[0.2em] uppercase leading-tight">ꯏꯟꯗꯤꯌꯥ ꯁꯤꯄꯤꯡ PAN INDIA</h5>
-                        <p class="text-[11px] text-gray-600 leading-tight uppercase font-bold tracking-[0.2em]">Rapid deployment delivery</p>
-                    </div>
+                    <h5 class="font-black text-[13px] tracking-[0.2em] uppercase">ꯏꯟꯗꯤꯌꯥ PAN INDIA</h5>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- PROCESS SECTION -->
-    <section id="process" class="py-32 px-6 max-w-6xl mx-auto text-center">
-        <div class="font-mayek text-3xl font-black tracking-widest mb-6 leading-none">ꯑꯣꯔꯗꯔ ꯇꯧꯕꯤꯌꯨ</div>
-        <h2 class="text-5xl md:text-[5rem] font-black uppercase tracking-tight mb-28 italic leading-none">HOW TO ORDER</h2>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-20 relative">
-            <div class="relative group flex flex-col items-center">
-                <div class="font-mayek text-3xl font-black text-white mb-6 tracking-widest leading-none">ꯑꯃꯥ</div>
-                <div class="relative inline-block mb-8">
-                    <span class="text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors block leading-none">1</span>
-                    <i data-lucide="target" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/30 group-hover:text-white transition-all"></i>
-                </div>
-                <h4 class="text-[14px] font-black uppercase tracking-[0.4em] mb-3 leading-none">CLICK ORDER</h4>
-                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.3em] leading-none">Select your piece</p>
-            </div>
-            <div class="relative group flex flex-col items-center">
-                <div class="font-mayek text-3xl font-black text-white mb-6 tracking-widest leading-none">ꯑꯅꯤ</div>
-                <div class="relative inline-block mb-8">
-                    <span class="text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors block leading-none">2</span>
-                    <i data-lucide="zap" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/30 group-hover:text-white transition-all"></i>
-                </div>
-                <h4 class="text-[14px] font-black uppercase tracking-[0.4em] mb-3 leading-none">WHATSAPP</h4>
-                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.3em] leading-none">Deploy logistics</p>
-            </div>
-            <div class="relative group flex flex-col items-center">
-                <div class="font-mayek text-3xl font-black text-white mb-6 tracking-widest leading-none">ꯑꯍꯨꯝ</div>
-                <div class="relative inline-block mb-8">
-                    <span class="text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors block leading-none">3</span>
-                    <i data-lucide="shield" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/30 group-hover:text-white transition-all"></i>
-                </div>
-                <h4 class="text-[14px] font-black uppercase tracking-[0.4em] mb-3 leading-none">PAY VIA UPI</h4>
-                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.3em] leading-none">Confirm signature</p>
-            </div>
-            <div class="relative group flex flex-col items-center">
-                <div class="font-mayek text-3xl font-black text-white mb-6 tracking-widest leading-none">ꯃꯔꯤ</div>
-                <div class="relative inline-block mb-8">
-                    <span class="text-8xl font-black text-white/5 group-hover:text-white/10 transition-colors block leading-none">4</span>
-                    <i data-lucide="activity" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/30 group-hover:text-white transition-all"></i>
-                </div>
-                <h4 class="text-[14px] font-black uppercase tracking-[0.4em] mb-3 leading-none">PROCESSING</h4>
-                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-[0.3em] leading-none">Unit production</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- STATS -->
-    <section class="py-32 px-6 flex justify-center relative">
-        <div class="bg-neutral-950 border-2 border-white/20 p-20 max-w-4xl w-full relative overflow-hidden">
-            <div class="flex flex-col items-center mb-20 relative z-10 text-center">
-                <i data-lucide="layers" class="text-white mb-10 w-16 h-16" strokeWidth="1"></i>
-                <div class="font-mayek text-4xl font-black mb-4 tracking-widest leading-none">ꯂꯤꯃꯤꯇꯦꯗ ꯗ꯭ꯔꯣꯄ</div>
-                <h2 class="text-5xl md:text-[4.5rem] font-black uppercase tracking-tight italic leading-none">LIMITED OPS</h2>
-                <p class="mt-8 text-gray-500 text-xs uppercase tracking-[0.5em] font-black leading-loose">
-                    NO RESTOCKS. NO SECOND CHANCES. <br/> REPRESENT THE CULTURE.
-                </p>
-            </div>
-            <div class="grid grid-cols-3 gap-10 border-t border-white/10 pt-20">
-                <div class="text-center">
-                    <p class="text-6xl font-black italic mb-3 tracking-tighter leading-none">50</p>
-                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 leading-none">PIECES</p>
-                </div>
-                <div class="text-center border-x border-white/10 px-6">
-                    <p class="text-6xl font-black italic mb-3 tracking-tighter leading-none">03</p>
-                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 leading-none">DESIGNS</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-6xl font-black italic mb-3 tracking-tighter leading-none">01</p>
-                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 leading-none">DROP</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FINAL CTA -->
-    <section class="py-48 text-center px-6 relative">
-        <div class="mb-20">
-            <h2 class="font-mayek text-7xl md:text-[10rem] font-black tracking-widest uppercase mb-6 leading-none">
-                ꯃꯔꯨ ꯁꯦꯠꯂꯨ
-            </h2>
-            <h3 class="text-3xl md:text-[4rem] font-black tracking-tighter uppercase opacity-50 italic leading-none">
-                REPRESENT YOUR ROOTS
-            </h3>
-        </div>
-        <button onclick="openWhatsApp()" class="group relative bg-white text-black px-20 py-10 text-[14px] font-black uppercase tracking-[0.6em] hover:scale-105 active:scale-95 transition-all flex items-center gap-8 mx-auto">
-            ORDER ON WHATSAPP <i data-lucide="arrow-right" class="w-6 h-6 group-hover:translate-x-4 transition-transform"></i>
-        </button>
     </section>
 
     <!-- FOOTER -->
@@ -418,144 +282,199 @@
         </div>
     </footer>
 
-    <!-- SCRIPTS -->
+    <!-- JS ENGINE -->
     <script>
-        // 1. Initialization
-        lucide.createIcons();
+        const PRODUCT_DATA = [
+            {
+                id: 1, name: "KANGLA SHA T-SHIRT", price: "₹799",
+                desc: "Premium heavyweight cotton with high-definition Kangla Sha sacred motif print. A staple of identity.",
+                images: ["https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=800", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800"]
+            },
+            {
+                id: 2, name: "KANGLA SHA HOODIE", price: "₹1,399",
+                desc: "Oversized tactical fit. Heavyweight fleece with detailed cultural embroidery of the Kangla Sha emblem.",
+                images: ["https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800", "https://images.unsplash.com/photo-1574167132757-12945569f140?auto=format&fit=crop&q=80&w=800"]
+            },
+            {
+                id: 3, name: "PHUNGA WARI T-SHIRT", price: "₹899",
+                desc: "Inspired by the warmth of Manipur storytelling traditions. Signature drop-shoulder cut with minimal back-print.",
+                images: ["https://images.unsplash.com/photo-1576566582149-4347729df66f?auto=format&fit=crop&q=80&w=800", "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=800"]
+            }
+        ];
+
+        let audioCtx, isWarm = false;
+        let currentProdIdx = 0, currentImgIdx = 0;
         const WHATSAPP_NUMBER = "919000000000";
         const MAYEK_CHARS = "ꯀꯁꯂꯃꯄꯅꯆꯇꯈꯉꯊꯋꯌꯍꯎꯏꯐꯑꯒꯓꯔꯕꯖꯗꯘꯙꯚ";
         const SPLASH_COLORS = ["#FF3B30", "#00F0FF", "#FFD600", "#00FF66", "#FFFFFF"];
 
-        // 2. Audio Logic (iPhone Tock)
-        const playTock = () => {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
-                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {}
-        };
-
-        // 3. Matrix Loader
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const columns = Math.floor(canvas.width / 20);
-        const drops = new Array(columns).fill(1);
-
-        const drawMatrix = () => {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = '22px monospace';
-            for (let i = 0; i < drops.length; i++) {
-                const text = MAYEK_CHARS.charAt(Math.floor(Math.random() * MAYEK_CHARS.length));
-                ctx.fillText(text, i * 20, drops[i] * 20);
-                if (drops[i] * 20 > canvas.height && Math.random() > 0.98) drops[i] = 0;
-                drops[i]++;
+        const initAudio = () => {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Parallel Universe Check: First tap buffer warm-up
+            if (!isWarm) {
+                const g = audioCtx.createGain();
+                g.gain.setValueAtTime(0, audioCtx.currentTime);
+                const o = audioCtx.createOscillator();
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + 0.1);
+                isWarm = true;
             }
         };
 
-        const matrixInterval = setInterval(drawMatrix, 33);
-
-        const runTypewriter = (text, element, speed, callback) => {
-            let i = 0;
-            const timer = setInterval(() => {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(timer);
-                    if (callback) callback();
-                }
-            }, speed);
+        const playTock = () => {
+            if (!audioCtx) return;
+            try {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.type = 'sine';
+                o.frequency.setValueAtTime(140, audioCtx.currentTime);
+                o.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.08);
+                g.gain.setValueAtTime(0.04, audioCtx.currentTime); // Fixed volume
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + 0.08);
+            } catch (e) {}
         };
 
+        lucide.createIcons();
+        const renderGrid = () => {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = PRODUCT_DATA.map((p, idx) => `
+                <div class="group tactical-border bg-neutral-950 p-2 cursor-pointer" onclick="openModal(${idx})">
+                    <div class="aspect-[3/4] overflow-hidden bg-black relative mb-6">
+                        <img src="${p.images[0]}" class="w-full h-full object-cover grayscale brightness-75 group-hover:scale-105 transition-all duration-1000">
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-xl font-black uppercase italic tracking-tighter mb-6 leading-none">${p.name}</h4>
+                        <div class="flex items-center justify-between border-t border-white/5 pt-6">
+                            <span class="text-2xl font-light opacity-60">${p.price}</span>
+                            <button class="flex items-center gap-1 text-[9px] font-black tracking-widest uppercase">
+                                <span class="font-mayek btn-label-mayek">ꯑꯀꯨꯞꯄ</span> DETAILS <i data-lucide="plus" class="w-2 h-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        };
+
+        const openModal = (idx) => {
+            currentProdIdx = idx; currentImgIdx = 0;
+            const p = PRODUCT_DATA[idx];
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-price').innerText = p.price;
+            document.getElementById('modal-desc').innerText = p.desc;
+            updateGallery();
+            const modal = document.getElementById('product-modal');
+            modal.classList.remove('invisible'); modal.classList.add('opacity-100');
+            document.querySelector('.modal-content').classList.remove('translate-y-10');
+            document.body.classList.add('no-scroll');
+        };
+
+        const closeModal = () => {
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('invisible'); modal.classList.remove('opacity-100');
+            document.querySelector('.modal-content').classList.add('translate-y-10');
+            document.body.classList.remove('no-scroll');
+        };
+
+        const updateGallery = () => {
+            const p = PRODUCT_DATA[currentProdIdx];
+            const container = document.getElementById('modal-images');
+            container.style.transform = `translateX(-${currentImgIdx * 100}%)`;
+            container.innerHTML = p.images.map(img => `<img src="${img}" class="w-full h-full object-cover shrink-0">`).join('');
+            const dots = document.getElementById('image-dots');
+            dots.innerHTML = p.images.map((_, i) => `<div class="h-1 w-8 rounded-full transition-colors ${i === currentImgIdx ? 'bg-white' : 'bg-white/20'}"></div>`).join('');
+        };
+
+        const nextImg = () => { currentImgIdx = (currentImgIdx + 1) % PRODUCT_DATA[currentProdIdx].images.length; updateGallery(); playTock(); };
+        const prevImg = () => { currentImgIdx = (currentImgIdx - 1 + PRODUCT_DATA[currentProdIdx].images.length) % PRODUCT_DATA[currentProdIdx].images.length; updateGallery(); playTock(); };
+        const toggleSizeChart = () => { document.getElementById('size-chart').classList.toggle('hidden'); playTock(); };
+
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const columns = Math.floor(canvas.width / 20);
+        const drops = new Array(columns).fill(1);
+        const drawMatrix = () => {
+            ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = '#fff'; ctx.font = '22px monospace';
+            drops.forEach((d, i) => {
+                ctx.fillText(MAYEK_CHARS[Math.floor(Math.random()*MAYEK_CHARS.length)], i*20, d*20);
+                if(d*20 > canvas.height && Math.random() > 0.98) drops[i] = 0;
+                drops[i]++;
+            });
+        };
+        const mInterval = setInterval(drawMatrix, 33);
+
         window.onload = () => {
+            renderGrid();
             setTimeout(() => {
-                clearInterval(matrixInterval);
+                clearInterval(mInterval);
                 document.getElementById('matrix-canvas').classList.add('hidden');
-                const container = document.getElementById('typewriter-container');
-                container.classList.remove('hidden');
-                
-                runTypewriter("ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ", document.getElementById('typewriter-main'), 120, () => {
-                    runTypewriter("KHURUMJARI", document.getElementById('typewriter-sub'), 80, () => {
-                        setTimeout(() => {
-                            document.getElementById('loader').classList.add('hidden');
-                        }, 1500);
+                document.getElementById('typewriter-container').classList.remove('hidden');
+                typewrite("ꯄ꯭ꯔꯣꯖꯦꯛꯇ ꯏꯔꯝꯗꯝ", 'typewriter-main', 120, () => {
+                    typewrite("KHURUMJARI", 'typewriter-sub', 80, () => {
+                        setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1200);
                     });
                 });
             }, 2500);
         };
 
-        // 4. Interaction (Splash + Sound)
+        const typewrite = (text, id, speed, cb) => {
+            let i = 0; const el = document.getElementById(id);
+            const timer = setInterval(() => {
+                if(i < text.length) { el.innerHTML += text.charAt(i); i++; }
+                else { clearInterval(timer); if(cb) cb(); }
+            }, speed);
+        };
+
         const handleInteraction = (e) => {
-            if (document.getElementById('loader').classList.contains('hidden')) {
-                playTock();
-                const x = e.clientX || (e.touches && e.touches[0].clientX);
-                const y = e.clientY || (e.touches && e.touches[0].clientY);
-                if (!x || !y) return;
+            if(!document.getElementById('loader').classList.contains('hidden')) return;
+            initAudio();
+            if(e.type === 'mousedown' && 'ontouchstart' in window) return;
+            if(e.target.closest('.modal-content') && !e.target.closest('button')) return;
 
-                for (let i = 0; i < 4; i++) {
-                    const el = document.createElement('div');
-                    el.className = 'particle font-mayek';
-                    el.innerText = MAYEK_CHARS[Math.floor(Math.random() * MAYEK_CHARS.length)];
-                    el.style.left = `${x}px`;
-                    el.style.top = `${y - 20}px`;
-                    el.style.color = SPLASH_COLORS[Math.floor(Math.random() * SPLASH_COLORS.length)];
-                    el.style.fontSize = `${1.2 + Math.random() * 0.5}rem`;
-                    
-                    const vx = (Math.random() - 0.5) * 40 * 4;
-                    const vy = -120 - Math.random() * 80;
-                    const tr = (Math.random() - 0.5) * 45;
-
-                    el.style.setProperty('--tx', `${vx}px`);
-                    el.style.setProperty('--ty', `${vy}px`);
-                    el.style.setProperty('--tr', `${tr}deg`);
-
-                    document.body.appendChild(el);
-                    setTimeout(() => el.remove(), 1500);
-                }
+            playTock();
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            for(let i=0; i<4; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle font-mayek';
+                p.innerText = MAYEK_CHARS[Math.floor(Math.random()*MAYEK_CHARS.length)];
+                p.style.left = `${x}px`; p.style.top = `${y-15}px`;
+                p.style.color = SPLASH_COLORS[Math.floor(Math.random()*SPLASH_COLORS.length)];
+                p.style.fontSize = `${1.2+Math.random()*0.4}rem`;
+                p.style.setProperty('--tx', `${(Math.random()-0.5)*50}px`);
+                p.style.setProperty('--ty', `${-70-Math.random()*50}px`);
+                p.style.setProperty('--tr', `${(Math.random()-0.5)*90}deg`);
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 1200);
             }
         };
 
         window.addEventListener('mousedown', handleInteraction);
-        window.addEventListener('touchstart', handleInteraction, { passive: true });
+        window.addEventListener('touchstart', handleInteraction, {passive:true});
 
-        // 5. Utility Functions
         const toggleMenu = () => {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
+            const m = document.getElementById('mobile-menu');
+            m.classList.toggle('hidden'); m.classList.toggle('flex');
+            document.body.classList.toggle('no-scroll');
         };
 
-        const openWhatsApp = (product = "") => {
-            const msg = product ? `Hi PE! I'd like to order ${product}.` : "Hi PE! I'm interested in the drop.";
+        const openWhatsApp = (p="") => {
+            const msg = p ? `Hi PE! I want to order ${p}.` : "Hi PE! I'm interested in your drop.";
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         window.onscroll = () => {
             const nav = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                nav.classList.add('glass', 'py-4', 'tactical-border');
-                nav.classList.remove('bg-transparent', 'py-8');
-            } else {
-                nav.classList.remove('glass', 'py-4', 'tactical-border');
-                nav.classList.add('bg-transparent', 'py-8');
-            }
+            if(window.scrollY > 50) { nav.classList.add('glass', 'py-4', 'tactical-border'); nav.classList.remove('py-8'); }
+            else { nav.classList.remove('glass', 'py-4', 'tactical-border'); nav.classList.add('py-8'); }
         };
     </script>
 </body>
 </html>
-
-```
-
