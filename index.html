@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Project Eramdam V2 | Wear Your Roots</title>
+    <title>Project Eramdam | Wear Your Roots</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Noto+Sans+Meetei+Mayek:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --brand-accent: #ffffff; }
-        
         body, html {
             margin: 0;
             padding: 0;
@@ -16,500 +15,1242 @@
             background-color: #000000;
             color: #ffffff;
             scroll-behavior: smooth;
-            line-height: 1; 
+            line-height: 1.4;
             -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation; 
-            overflow-x: hidden;
-            width: 100%;
+            /* CRITICAL: Allows vertical scroll but disables double-tap zoom and pinch-to-zoom */
+            touch-action: pan-y; 
         }
         
         .meetei-mayek { font-family: 'Noto Sans Meetei Mayek', sans-serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* UPGRADED ALIGNMENT: Uses baseline alignment to fix the jagged PC look */
+        .dual-lang-lock { display: flex; align-items: baseline; justify-content: center; gap: 0.5rem; }
+        .dual-lang-lock-left { display: flex; align-items: baseline; justify-content: flex-start; gap: 0.5rem; }
         
         .min-h-dvh { min-height: 100vh; min-height: 100dvh; }
 
-        /* PC CURSOR */
+        /* CUSTOM CURSOR SYSTEM (DESKTOP ONLY) */
         @media (pointer: fine) {
             body, a, button, input, .cursor-pointer { cursor: none !important; }
             .custom-cursor-dot {
-                position: fixed; top: 0; left: 0; width: 4px; height: 4px; 
-                background: #ffffff; border-radius: 50%; pointer-events: none; z-index: 9999999;
-                transform: translate3d(-50%, -50%, 0); will-change: transform;
+                position: fixed; top: 0; left: 0; width: 6px; height: 6px; 
+                background: #00FFFF; border-radius: 50%; pointer-events: none; z-index: 9999999;
+                transform: translate(-50%, -50%); transition: background 0.2s ease, width 0.2s ease, height 0.2s ease;
+                box-shadow: 0 0 10px #00FFFF;
             }
             .custom-cursor-ring {
-                position: fixed; top: 0; left: 0; width: 30px; height: 30px;
-                border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; pointer-events: none; z-index: 9999998;
-                transform: translate3d(-50%, -50%, 0);
-                transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
-                will-change: transform;
+                position: fixed; top: 0; left: 0; width: 32px; height: 32px;
+                border: 1px solid rgba(0, 255, 255, 0.4); border-radius: 50%; pointer-events: none; z-index: 9999998;
+                transform: translate(-50%, -50%); transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
             }
-            .custom-cursor-ring.hovered { width: 50px; height: 50px; border-color: #ffffff; background: rgba(255,255,255,0.05); }
+            .custom-cursor-dot.hovered { background: transparent; box-shadow: none; }
+            .custom-cursor-ring.hovered { width: 50px; height: 50px; border-color: rgba(255, 255, 255, 0.8); background: rgba(255,255,255,0.05); }
         }
         @media (pointer: coarse) { .custom-cursor-dot, .custom-cursor-ring { display: none !important; } }
 
-        /* MATRIX CANVAS */
-        #matrix-canvas {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-            z-index: 0; opacity: 0.15; pointer-events: none;
+        /* MATHEMATICAL FILM GRAIN OVERLAY */
+        .film-grain {
+            position: fixed; inset: 0; pointer-events: none; z-index: 999900; opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        #glitch-loader { 
-            position: fixed; inset: 0; z-index: 9999; background: #000; 
-            display: flex; flex-direction: column; items-center; justify-content: center;
-            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;
-        }
-
-        .reveal { opacity: 0; transform: translateY(15px); transition: all 0.6s cubic-bezier(0.2, 1, 0.3, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-
-        .glass-nav { background: #000; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
-
-        .haptic-btn { transition: transform 0.1s ease, background 0.3s ease, filter 0.3s ease; cursor: pointer; touch-action: manipulation; }
-        .haptic-btn:active { transform: scale(0.92); }
-
-        .heading-black { letter-spacing: -0.06em; line-height: 0.8; text-transform: uppercase; font-weight: 900; font-style: italic; }
-
-        .custom-modal { backdrop-filter: blur(40px); background: rgba(0, 0, 0, 0.98); overscroll-behavior: contain; }
-
-        /* --- MOBILE REFINED SCALING --- */
-        @media (max-width: 768px) {
-            .nav-text-mm { font-size: 54px !important; font-weight: 900; letter-spacing: -0.02em; } 
-            .nav-logo-box { width: 90px !important; height: 90px !important; }
-            .nav-sub-text { font-size: 14px !important; font-weight: 900; opacity: 0.4; letter-spacing: 0.1em; }
-            
-            .oracle-btn { padding: 24px 44px !important; border-width: 2px !important; }
-            .oracle-btn .meetei-mayek { font-size: 34px !important; }
-            
-            .cart-icon { width: 52px !important; height: 52px !important; }
-            .cart-badge-ui { font-size: 18px !important; width: 42px !important; height: 42px !important; top: -14px !important; right: -14px !important; border-width: 3px !important; }
-            
-            .mobile-heading { font-size: 8rem !important; }
-            .section-label { font-size: 74px !important; font-weight: 900; } 
-            .section-sublabel { font-size: 20px !important; letter-spacing: 0.5em !important; font-weight: 900; }
-
-            .product-grid { grid-template-columns: 1fr !important; gap: 4rem; padding: 0 1.5rem; } 
-            .product-card-btn { padding: 34px 10px !important; border-width: 2px !important; } 
-            .btn-text-mm { font-size: 26px !important; }
-
-            section { padding-top: 10rem !important; padding-bottom: 10rem !important; }
-        }
-
-        .text-outline { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5); color: transparent; }
-        .tier-btn.active { background: #fff; color: #000; font-weight: 900; }
+        /* MULTI-COLOR NEON MATRIX GLITCH */
+        #glitch-loader { transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out; }
+        .text-glow { text-shadow: 0 0 15px rgba(255,255,255,0.4), 0 0 30px rgba(255,255,255,0.2); }
         
+        .multi-neon-text {
+            background: linear-gradient(90deg, #00FFFF, #FF00FF, #39FF14, #FF073A, #00FFFF);
+            background-size: 200% auto; color: transparent; -webkit-background-clip: text;
+            animation: gradientMove 2s linear infinite;
+        }
+        @keyframes gradientMove { to { background-position: 200% center; } }
+        /* FIXED HALF-SCREEN GLITCH: Force dimensions and overflow */
+        #glitch-bg { position: absolute; inset: 0; width: 100vw; height: 100vh; overflow: hidden; word-break: break-all; line-height: 0.8; }
+
+        /* KINETIC NEON MULTI-COLOR PARTICLES */
+        .neon-particle {
+            position: fixed; pointer-events: none; z-index: 999999;
+            font-family: 'Noto Sans Meetei Mayek', sans-serif; font-size: 40px; font-weight: 700;
+            color: var(--neon-color); text-shadow: 0 0 10px var(--neon-color), 0 0 20px var(--neon-color);
+            animation: neonFloat 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity;
+        }
+        @media (min-width: 768px) { .neon-particle { font-size: 30px; } }
+        @keyframes neonFloat {
+            0% { opacity: 1; transform: translateY(0) scale(0.8) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.5) rotate(15deg); }
+        }
+
+        /* 3D TILT ENGINE (DESKTOP ONLY) - Mobile gets clean active state */
+        .tilt-card { transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; will-change: transform, box-shadow; transform-style: preserve-3d; position: relative; }
+        @media (pointer: fine) { .tilt-card:hover { z-index: 50; } }
+        @media (pointer: coarse) { .tilt-card:active { transform: scale(0.98); transition: transform 0.1s; } }
+
+        .reveal { opacity: 0; transform: translateY(30px) scale(0.98); transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0) scale(1); }
+
+        .modal-animate-in { animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes modalPop { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+        @keyframes heroZoom { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+        .animate-hero-zoom { animation: heroZoom 25s infinite alternate ease-in-out; }
         @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
         .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 35s linear infinite; }
+        @keyframes slideUpFade { 0% { transform: translateY(100%); opacity: 0; } 10% { transform: translateY(0); opacity: 1; } 90% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(100%); opacity: 0; } }
+        .toast-animate { animation: slideUpFade 3.5s forwards cubic-bezier(0.2, 1, 0.3, 1); }
+
+        .glass-nav { background: rgba(0, 0, 0, 0.90); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .haptic-btn { transition: transform 0.1s ease, filter 0.3s ease, background-color 0.3s ease, color 0.3s ease; cursor: pointer; touch-action: manipulation; }
+        .haptic-btn:active { transform: scale(0.95); }
+        .btn-solid:hover { filter: invert(1); }
+        .btn-outline:hover { background-color: #ffffff; color: #000000; }
+        .btn-outline:hover .mm-sub { color: #000000 !important; opacity: 0.6; }
+
+        .heading-bold { letter-spacing: -0.06em; line-height: 0.85; text-transform: uppercase; }
+
+        .custom-modal { backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); background: rgba(0, 0, 0, 0.85); overscroll-behavior: contain; }
+
+        .modal-scroll::-webkit-scrollbar { width: 4px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .modal-scroll { overscroll-behavior: contain; } 
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .snap-x-mandatory { scroll-snap-type: x mandatory; }
+        .snap-center { scroll-snap-align: center; }
+
+        /* MOBILE SCALE-UP FIXES */
+        @media (max-width: 768px) {
+            .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; padding: 0 0.5rem; }
+            .mobile-heading { font-size: 3.5rem !important; }
+            .product-card-btn { padding: 14px 6px !important; margin-top: auto; }
+            .btn-text-mm { font-size: 14px !important; } /* Increased */
+            .btn-text-en { font-size: 10px !important; } /* Increased */
+            .nav-text-mm { font-size: 20px !important; } /* Logo increased */
+        }
+
+        .text-outline { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4); color: transparent; }
+        .tier-btn.active { background: #fff; color: #000; }
+        .tier-btn.active .mm-sub { color: #000000 !important; opacity: 0.6; }
+        .ig-post::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s ease; }
+        .ig-post:hover::after { opacity: 1; }
     </style>
 </head>
 <body class="antialiased overflow-x-hidden">
 
-    <!-- MATRIX ENGINE -->
-    <canvas id="matrix-canvas"></canvas>
+    <!-- MATHEMATICAL FILM GRAIN OVERLAY -->
+    <div class="film-grain"></div>
 
-    <!-- OPTIMIZED CURSOR -->
+    <!-- CUSTOM IMMERSIVE CURSOR -->
     <div id="cursor-dot" class="custom-cursor-dot"></div>
     <div id="cursor-ring" class="custom-cursor-ring"></div>
 
-    <!-- CLEAN SYSTEM LOADER -->
-    <div id="glitch-loader">
-        <div class="relative z-10 flex flex-col items-center">
-            <h1 id="glitch-text" class="meetei-mayek text-6xl md:text-9xl text-white font-black tracking-tighter text-center px-4"></h1>
-            <div id="glitch-sub" class="mono text-[12px] md:text-sm font-black text-white/30 tracking-[1em] uppercase mt-20 opacity-0">SYSTEM_SYNC</div>
+    <!-- MASSIVE MULTI-COLOR NEON GLITCH LOADER -->
+    <div id="glitch-loader" class="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center pointer-events-none overflow-hidden">
+        <!-- Edge-to-edge container -->
+        <div id="glitch-bg" class="opacity-[0.08] meetei-mayek text-2xl md:text-3xl blur-[1px] multi-neon-text"></div>
+        <div class="relative z-10 flex flex-col items-center justify-center">
+            <h1 id="glitch-text" class="meetei-mayek text-5xl md:text-8xl text-white font-black tracking-[0.2em] text-center px-4 leading-relaxed text-glow transition-all duration-100"></h1>
+            <div id="glitch-sub" class="mono text-[10px] md:text-[12px] font-bold text-white/50 tracking-[0.6em] uppercase mt-6 opacity-0 transition-opacity duration-300">SYSTEM SYNCING...</div>
         </div>
     </div>
 
-    <!-- NAVIGATION (ULTRA-CLEAN MASSIVE) -->
-    <nav class="fixed top-0 w-full z-[100] glass-nav px-6 md:px-16 py-8 md:py-12 flex justify-between items-center">
-        <div class="flex items-center gap-8 group cursor-pointer select-none audio-trigger" onclick="window.scrollTo(0,0)">
-            <!-- REPLACED PE BOX WITH YOUR LOGO -->
-            <div class="nav-logo-box flex items-center justify-center overflow-hidden">
-                <img src="WHITE.jpg" alt="Logo" class="w-full h-full object-contain filter invert-0 group-hover:scale-110 transition-transform duration-500">
+    <!-- Navigation (Mobile UI Upscaled) -->
+    <nav class="fixed top-0 w-full z-[100] glass-nav px-4 md:px-8 py-3 md:py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3 group cursor-pointer select-none audio-trigger interactive-element" onclick="window.scrollTo(0,0)">
+            <div class="w-10 h-10 md:w-12 md:h-12 border border-white/20 flex items-center justify-center rounded-sm bg-white/5">
+                <span class="font-black text-base">PE</span>
             </div>
             <div class="flex flex-col text-left">
-                <span class="meetei-mayek nav-text-mm leading-none">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</span>
-                <span class="nav-sub-text font-black uppercase">Project Eramdam</span>
+                <span class="meetei-mayek nav-text-mm text-lg md:text-xl leading-none group-hover:text-gray-300 transition-colors tracking-wide">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</span>
+                <span class="font-black tracking-tighter text-[10px] md:text-[11px] opacity-40 mt-1 uppercase">Project Eramdam</span>
             </div>
         </div>
-        <div class="flex items-center gap-10">
-            <button onclick="openModal('ai-modal')" class="oracle-btn haptic-btn border-2 border-white/40 px-10 py-6 audio-trigger flex items-center gap-5 hover:bg-white hover:text-black">
-                <span class="meetei-mayek font-bold">ꯋꯥꯔꯤ</span>
-                <span class="mono text-[12px] font-black uppercase tracking-widest opacity-40 hidden md:inline">Oracle</span>
+        <div class="flex items-center gap-3 md:gap-4">
+            <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" rel="noopener noreferrer" class="opacity-60 hover:opacity-100 transition-opacity p-2 hover:scale-110 transform duration-200 audio-trigger interactive-element">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            
+            <button onclick="openModal('ai-modal')" class="haptic-btn btn-outline interactive-element dual-lang-lock border border-white/20 px-3 md:px-4 py-2 transition-all rounded-sm audio-trigger">
+                <span class="meetei-mayek text-base md:text-lg font-bold">ꯋꯥꯔꯤ</span>
+                <span class="mono mm-sub text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-white/50">Oracle</span>
             </button>
-            <button onclick="openCart()" class="relative haptic-btn audio-trigger p-4">
-                <svg class="cart-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                <span id="cart-badge" class="cart-badge-ui absolute bg-white text-black font-black rounded-full flex items-center justify-center hidden border-4 border-black">0</span>
+            
+            <button onclick="openCart()" class="relative opacity-80 hover:opacity-100 transition-opacity p-2 haptic-btn interactive-element flex items-center audio-trigger">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span id="cart-badge" class="absolute -top-1 -right-1 bg-white text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
             </button>
         </div>
     </nav>
 
     <!-- 1. HERO -->
     <section class="relative min-h-dvh flex flex-col justify-center items-center text-center px-6 overflow-hidden">
-        <div class="absolute inset-0 z-0 bg-black">
-            <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-60 grayscale">
+        <div class="absolute inset-0 z-0 bg-[#050505]">
+            <video autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1605647540924-852290f6b0d5?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover opacity-40 grayscale">
                 <source src="https://cdn.pixabay.com/video/2020/05/24/40050-424169720_large.mp4" type="video/mp4">
             </video>
-            <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/80"></div>
         </div>
         
-        <div class="relative z-10 reveal mt-48">
-            <div class="dual-lang-lock mb-12 opacity-100">
-                <span class="meetei-mayek text-7xl font-bold">ꯍꯧꯔꯛꯐꯝ</span>
-                <span class="mono text-sm uppercase tracking-[1em] text-white/30 ml-10">Origin</span>
+        <div class="relative z-10 reveal flex flex-col items-center mt-12">
+            <div class="dual-lang-lock mb-4 opacity-60">
+                <span class="meetei-mayek text-2xl md:text-3xl drop-shadow-lg">ꯍꯧꯔꯛꯐꯝ</span>
+                <span class="mono text-[11px] md:text-xs uppercase tracking-[0.4em] text-white/50">Origin</span>
             </div>
-            <h1 class="text-7xl md:text-[15rem] heading-black mobile-heading mb-14">
+            
+            <h1 class="text-6xl md:text-[12rem] font-black heading-bold mb-4 italic mobile-heading drop-shadow-2xl">
                 Wear Your <br/><span class="text-outline">Roots</span>
             </h1>
-            <p class="mobile-sub-heading text-xs md:text-3xl font-black tracking-[1em] opacity-80 uppercase mt-16">
-                Born in Manipur <span class="mx-10 opacity-20">/</span> Streetwear
+            <p class="text-[11px] md:text-xl font-bold tracking-[0.5em] md:tracking-[0.7em] opacity-80 uppercase mt-4">
+                Born in Manipur <span class="mx-2 opacity-20">/</span> Streetwear
             </p>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 opacity-40 animate-bounce-subtle z-10 cursor-pointer audio-trigger interactive-element" onclick="document.getElementById('manifesto').scrollIntoView({behavior: 'smooth'})">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
     </section>
 
-    <!-- TICKER -->
-    <div class="bg-black border-y-2 border-white/10 py-12 overflow-hidden flex items-center relative">
-        <div class="animate-marquee mono text-xs md:text-2xl tracking-[0.8em] font-black uppercase text-white/30 flex items-center">
-            <span class="px-24">THE CULTURAL THREAD</span>
-            <span class="px-24 text-white">[ LIMITED EDITIONS ]</span>
-            <span class="px-24 meetei-mayek text-5xl">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</span>
-            <span class="px-24">BORN IN MANIPUR</span>
-            <span class="px-24 text-white">[ CHAPTER_01_26 ]</span>
+    <!-- 2. CULTURAL THREAD TICKER -->
+    <div class="bg-[#080808] border-y border-white/10 py-3 overflow-hidden flex items-center relative">
+        <div class="animate-marquee mono text-[11px] md:text-xs tracking-[0.3em] uppercase text-white/50 flex items-center">
+            <span class="px-6 text-white/30">/// THE CULTURAL THREAD ///</span>
+            <span class="px-6 text-white font-bold tracking-widest">[ LIMITED EDITIONS ]</span>
+            <span class="px-6 meetei-mayek text-base text-white/60">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</span>
+            <span class="px-6 text-white/30">/// BORN IN MANIPUR ///</span>
+            <span class="px-6 text-white font-bold tracking-widest">[ CHAPTER_01_26 ]</span>
+            <span class="px-6 text-white/30">WEAR YOUR ROOTS</span>
+            <span class="px-6 text-white/30">/// THE CULTURAL THREAD ///</span>
+            <span class="px-6 text-white font-bold tracking-widest">[ LIMITED EDITIONS ]</span>
+            <span class="px-6 meetei-mayek text-base text-white/60">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</span>
+            <span class="px-6 text-white/30">/// BORN IN MANIPUR ///</span>
+            <span class="px-6 text-white font-bold tracking-widest">[ CHAPTER_01_26 ]</span>
+            <span class="px-6 text-white/30">WEAR YOUR ROOTS</span>
         </div>
     </div>
 
-    <!-- MANIFESTO -->
-    <section id="manifesto" class="py-48 md:py-80 bg-black border-b border-white/10">
+    <!-- 3. EDITORIAL: THE MANIFESTO -->
+    <section id="manifesto" class="py-24 md:py-40 bg-black relative border-b border-white/5 overflow-hidden">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-32 items-center">
-                <div class="lg:col-span-7 reveal">
-                     <div class="aspect-[4/5] md:aspect-[3/4] overflow-hidden border border-white/20 relative tilt-card">
-                         <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover grayscale opacity-50">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center">
+                <div class="lg:col-span-7 relative z-10 reveal pr-0 lg:pr-10">
+                     <div class="aspect-[4/5] md:aspect-[3/4] overflow-hidden border border-white/10 relative shadow-2xl bg-zinc-900 rounded-sm tilt-card interactive-element">
+                         <video autoplay loop muted playsinline poster="IMAGE/Rooted in Legend.jpg" class="absolute inset-0 w-full h-full object-cover grayscale opacity-60">
                              <source src="https://cdn.pixabay.com/video/2015/09/25/2544-160352528_large.mp4" type="video/mp4">
                          </video>
-                         <div class="absolute bottom-16 left-16 flex flex-col gap-6">
-                             <span class="meetei-mayek text-9xl font-black">ꯏꯔꯝꯗꯝ</span>
-                             <span class="mono text-[18px] font-black uppercase tracking-widest opacity-40">Our Land</span>
+                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90"></div>
+                         
+                         <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 flex flex-col gap-2">
+                             <span class="meetei-mayek text-5xl opacity-90 drop-shadow-lg">ꯏꯔꯝꯗꯝ</span>
+                             <span class="mono text-[12px] uppercase tracking-[0.4em] opacity-60 text-white/80">Our Land</span>
                          </div>
                      </div>
                 </div>
-                <div class="lg:col-span-5 reveal">
-                    <div class="dual-lang-lock-left mb-24">
-                        <span class="meetei-mayek text-6xl font-black">ꯄꯨꯟꯅ ꯌꯥꯟꯅꯕ</span>
-                        <span class="mono text-[15px] font-black uppercase tracking-widest text-white/30 ml-12">Shared Roots</span>
-                    </div>
-                    <h2 class="text-6xl md:text-[12rem] heading-black mb-20 leading-none">Rooted In <br/><span class="text-outline">Legend.</span></h2>
-                    <div class="space-y-16 text-2xl md:text-3xl text-white/70 leading-relaxed font-light border-l-4 border-white/20 pl-16">
-                        <p>Before trends. There was <b>blood, soil, and symbol</b>.</p>
-                        <p class="mono text-white italic font-black uppercase tracking-[0.4em] py-16 border-y border-white/10 text-2xl">"Remembering Who We Are."</p>
-                        <p>Every thread we weave carries ritual and rhythm. Driven by a generation that refuses to forget.</p>
+                
+                <div class="lg:col-span-6 lg:-ml-24 relative z-20 reveal tilt-card interactive-element" style="transition-delay: 200ms;">
+                    <div class="bg-[#050505] border border-white/5 p-8 md:p-16 shadow-2xl relative rounded-sm">
+                        <!-- PERFECTLY ALIGNED SHARED ROOTS -->
+                        <div class="dual-lang-lock-left mb-8 opacity-50">
+                            <span class="w-8 h-[1px] bg-white/30 block mr-2"></span>
+                            <span class="meetei-mayek text-lg md:text-xl">ꯄꯨꯟꯅ ꯌꯥꯟꯅꯕ</span>
+                            <span class="mono text-[10px] md:text-[11px] uppercase tracking-[0.4em] text-white/60">Our Shared Roots</span>
+                        </div>
+                        
+                        <h2 class="text-5xl md:text-7xl font-black heading-bold italic mb-10 leading-[0.85] tracking-tighter uppercase">
+                            Rooted In <br/>
+                            <span class="text-white/60 text-outline">Legend.</span>
+                        </h2>
+     
+                        <div class="space-y-6 md:space-y-8 text-sm md:text-base font-light text-white/70 leading-relaxed relative">
+                            <div class="absolute left-0 top-2 bottom-2 w-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent"></div>
+                            
+                            <p class="pl-6">Before trends. Before hype. There was <b class="text-white font-bold uppercase tracking-wide">blood, soil, and symbol</b>. We are born from Kangleipak, Manipur—a realm where myth is not merely a story, but a lived memory. A land where every peak and valley holds a guardian of our collective identity.</p>
+                            
+                            <div class="pl-6 py-6 my-8 border-y border-white/5 bg-white/[0.01]">
+                                <p class="mono font-bold text-sm md:text-base text-white/90 leading-relaxed uppercase tracking-widest">"We are not discovering our identity. We are remembering it."</p>
+                            </div>
+                            
+                            <p class="pl-6">Every thread we weave carries ritual, resistance, and rhythm. This is a continuation. Inspired by our ancestors, driven by a generation that refuses to forget. We reclaim what was always ours—our roots, our voice, our undeniable presence.</p>
+                        </div>
+     
+                        <div class="mt-12 pt-8 border-t border-white/5 flex items-center justify-between">
+                            <p class="meetei-mayek text-base opacity-80">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</p>
+                            <p class="mono text-[10px] uppercase tracking-widest opacity-30">Wear Your Roots</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- HOW TO CLAIM -->
-    <section class="py-48 px-6 bg-black border-b border-white/10 text-center">
+    <!-- 4. HOW TO CLAIM YOUR PIECE -->
+    <section class="py-16 md:py-24 px-6 bg-[#000] border-b border-white/5 text-center">
         <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col mb-48 reveal">
-                <span class="meetei-mayek section-label">ꯂꯧꯈꯠꯄ</span>
-                <h2 class="text-5xl md:text-[11rem] heading-black uppercase mt-12">Claim Your Piece</h2>
+            <div class="dual-lang-lock flex-col mb-12 reveal">
+                <span class="meetei-mayek text-2xl md:text-3xl opacity-60">ꯂꯧꯈꯠꯄ</span>
+                <h2 class="text-4xl md:text-5xl font-black heading-bold italic uppercase mt-2">How to claim your piece</h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-12">
-                <div class="bg-zinc-950 p-20 border border-white/20 reveal flex flex-col items-center">
-                    <div class="w-24 h-24 mb-14 border border-white/30 bg-white/5 flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M3 12h6m6 0h6M12 3v6m0 6v6"/></svg>
+            
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+                <div class="tilt-card interactive-element bg-[#050505] p-6 md:p-8 border border-white/10 flex flex-col items-center reveal rounded-sm" style="transition-delay: 100ms;">
+                    <div class="w-12 h-12 md:w-14 md:h-14 mb-4 border border-white/20 bg-white/5 flex items-center justify-center rounded-sm opacity-80">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M3 12h6m6 0h6M12 3v6m0 6v6"/></svg>
                     </div>
-                    <h3 class="text-2xl font-black uppercase">Style</h3>
+                    <div class="dual-lang-lock mb-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <span class="meetei-mayek text-base text-white font-bold">ꯑꯃ</span>
+                        <span class="mono text-[10px] uppercase tracking-[0.2em] text-white/50 font-bold">01</span>
+                    </div>
+                    <h3 class="text-sm font-bold uppercase mb-2 tracking-widest">Pick a Style</h3>
+                    <p class="text-[11px] opacity-40 leading-relaxed">Choose your identity from the collection.</p>
                 </div>
-                <div class="bg-zinc-950 p-20 border border-white/20 reveal flex flex-col items-center">
-                    <div class="w-24 h-24 mb-14 border border-white/30 bg-white/5 flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <div class="tilt-card interactive-element bg-[#050505] p-6 md:p-8 border border-white/10 flex flex-col items-center reveal rounded-sm" style="transition-delay: 200ms;">
+                    <div class="w-12 h-12 md:w-14 md:h-14 mb-4 border border-white/20 bg-white/5 flex items-center justify-center rounded-sm opacity-80">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     </div>
-                    <h3 class="text-2xl font-black uppercase">Bag</h3>
+                    <div class="dual-lang-lock mb-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <span class="meetei-mayek text-base text-white font-bold">ꯑꯅꯤ</span>
+                        <span class="mono text-[10px] uppercase tracking-[0.2em] text-white/50 font-bold">02</span>
+                    </div>
+                    <h3 class="text-sm font-bold uppercase mb-2 tracking-widest">Add To Bag</h3>
+                    <p class="text-[11px] opacity-40 leading-relaxed">Secure pieces to your local collection.</p>
                 </div>
-                <div class="bg-zinc-950 p-20 border border-white/20 reveal flex flex-col items-center">
-                    <div class="w-24 h-24 mb-14 border border-white/30 bg-white/5 flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div class="tilt-card interactive-element bg-[#050505] p-6 md:p-8 border border-white/10 flex flex-col items-center reveal rounded-sm" style="transition-delay: 300ms;">
+                    <div class="w-12 h-12 md:w-14 md:h-14 mb-4 border border-white/20 bg-white/5 flex items-center justify-center rounded-sm opacity-80">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </div>
-                    <h3 class="text-2xl font-black uppercase">Submit</h3>
+                    <div class="dual-lang-lock mb-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <span class="meetei-mayek text-base text-white font-bold">ꯑꯍꯨꯝ</span>
+                        <span class="mono text-[10px] uppercase tracking-[0.2em] text-white/50 font-bold">03</span>
+                    </div>
+                    <h3 class="text-sm font-bold uppercase mb-2 tracking-widest">Submit Order</h3>
+                    <p class="text-[11px] opacity-40 leading-relaxed">Your bag connects to our WhatsApp directly.</p>
                 </div>
-                <div class="bg-zinc-950 p-20 border border-white/20 reveal flex flex-col items-center">
-                    <div class="w-24 h-24 mb-14 border border-white/30 bg-white/5 flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <div class="tilt-card interactive-element bg-[#050505] p-6 md:p-8 border border-white/10 flex flex-col items-center reveal rounded-sm" style="transition-delay: 400ms;">
+                    <div class="w-12 h-12 md:w-14 md:h-14 mb-4 border border-white/20 bg-white/5 flex items-center justify-center rounded-sm opacity-80">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
-                    <h3 class="text-2xl font-black uppercase">Pay</h3>
+                    <div class="dual-lang-lock mb-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <span class="meetei-mayek text-base text-white font-bold">ꯃꯔꯤ</span>
+                        <span class="mono text-[10px] uppercase tracking-[0.2em] text-white/50 font-bold">04</span>
+                    </div>
+                    <h3 class="text-sm font-bold uppercase mb-2 tracking-widest">Pay via UPI</h3>
+                    <p class="text-[11px] opacity-40 leading-relaxed">Secure your piece with a direct payment.</p>
                 </div>
-                <div class="bg-zinc-950 p-20 border border-white/20 reveal flex flex-col items-center">
-                    <div class="w-24 h-24 mb-14 border border-white/30 bg-white/5 flex items-center justify-center">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <div class="tilt-card interactive-element bg-[#050505] p-6 md:p-8 border border-white/10 flex flex-col items-center col-span-2 md:col-span-1 reveal rounded-sm" style="transition-delay: 500ms;">
+                    <div class="w-12 h-12 md:w-14 md:h-14 mb-4 border border-white/20 bg-white/5 flex items-center justify-center rounded-sm opacity-80">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                     </div>
-                    <h3 class="text-2xl font-black uppercase">Fast</h3>
+                    <div class="dual-lang-lock mb-4 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                        <span class="meetei-mayek text-base text-white font-bold">ꯃꯉꯥ</span>
+                        <span class="mono text-[10px] uppercase tracking-[0.2em] text-white/50 font-bold">05</span>
+                    </div>
+                    <h3 class="text-sm font-bold uppercase mb-2 tracking-widest">Fast Delivery</h3>
+                    <p class="text-[11px] opacity-40 leading-relaxed">We ship straight from Manipur to your door.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- THE DROP -->
-    <section id="drop" class="py-48 px-6 bg-black">
+    <!-- 5. THE DROP -->
+    <section id="drop" class="py-16 pb-28 md:py-32 px-4 md:px-6 bg-black relative">
         <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col items-center text-center mb-48 reveal">
-                <span class="meetei-mayek section-label">ꯄꯣꯠꯊꯣꯛ</span>
-                <span class="mono text-sm opacity-30 uppercase tracking-[1em] mt-12 section-sublabel">CH_01_26</span>
-                <h2 class="text-8xl md:text-[14rem] heading-black mb-24 uppercase">The Drop</h2>
-                <div class="flex gap-10 mono text-[16px] uppercase bg-zinc-950 p-8 border border-white/20 w-full md:w-auto">
-                    <button onclick="filterTier('all')" class="tier-btn active haptic-btn px-20 py-10 transition-all flex-1">ꯄꯨꯝꯅꯃꯛ</button>
-                    <button onclick="filterTier('guardian')" class="tier-btn haptic-btn px-20 py-10 transition-all flex-1">ꯉꯥꯛꯁꯦꯟꯕ</button>
-                    <button onclick="filterTier('scroll')" class="tier-btn haptic-btn px-20 py-10 transition-all flex-1">ꯆꯦꯐꯣꯡ</button>
+            <div class="flex flex-col items-center text-center mb-10 md:mb-16 reveal">
+                <div class="dual-lang-lock flex-col mb-4">
+                    <span class="meetei-mayek text-2xl md:text-3xl opacity-60">ꯄꯣꯠꯊꯣꯛ</span>
+                    <span class="mono text-[11px] opacity-40 uppercase tracking-[0.6em] mt-2">Chapter_01_26</span>
+                </div>
+                <h2 class="text-5xl md:text-8xl font-black heading-bold italic tracking-tighter mb-8 uppercase">The Drop</h2>
+                
+                <div class="flex gap-2 mono text-[10px] uppercase bg-[#050505] p-1.5 border border-white/10 w-full md:w-auto justify-center rounded-sm">
+                    <button onclick="filterTier('all')" class="tier-btn active haptic-btn btn-outline interactive-element dual-lang-lock px-6 py-4 md:py-3 transition-all flex-1 md:flex-none rounded-sm audio-trigger">
+                        <span class="meetei-mayek text-[15px] font-bold">ꯄꯨꯝꯅꯃꯛ</span> 
+                        <span class="mono mm-sub text-[10px] font-bold tracking-widest text-white/50">All</span>
+                    </button>
+                    <button onclick="filterTier('guardian')" class="tier-btn haptic-btn btn-outline interactive-element dual-lang-lock px-6 py-4 md:py-3 transition-all flex-1 md:flex-none rounded-sm audio-trigger">
+                        <span class="meetei-mayek text-[15px] font-bold">ꯉꯥꯛꯁꯦꯟꯕ</span> 
+                        <span class="mono mm-sub text-[10px] font-bold tracking-widest text-white/50">Guardian</span>
+                    </button>
+                    <button onclick="filterTier('scroll')" class="tier-btn haptic-btn btn-outline interactive-element dual-lang-lock px-6 py-4 md:py-3 transition-all flex-1 md:flex-none rounded-sm audio-trigger">
+                        <span class="meetei-mayek text-[15px] font-bold">ꯆꯦꯐꯣꯡ</span> 
+                        <span class="mono mm-sub text-[10px] font-bold tracking-widest text-white/50">Scroll</span>
+                    </button>
                 </div>
             </div>
-            <div class="product-grid grid" id="product-container"></div>
+            
+            <!-- Products Injected Here -->
+            <div class="product-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6" id="product-container">
+                <div class="col-span-full text-center py-20 mono text-sm opacity-50 animate-pulse uppercase tracking-widest">
+                    LOADING ARTIFACTS...
+                </div>
+            </div>
         </div>
+    </section>
+
+    <!-- 6. THE DETAILS (FAQ) -->
+    <section class="py-16 md:py-32 px-6 bg-[#080808] border-y border-white/5">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-col items-center text-center mb-12 md:mb-20 reveal">
+                <div class="dual-lang-lock flex-col mb-4">
+                    <span class="meetei-mayek text-2xl md:text-3xl opacity-60">ꯋꯥꯍꯪ</span>
+                    <span class="mono text-[11px] opacity-40 uppercase tracking-[0.8em] mt-2">The Details</span>
+                </div>
+                <h2 class="text-4xl md:text-6xl font-black heading-bold italic tracking-tighter uppercase">Frequently Asked</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <div class="tilt-card interactive-element bg-[#111] border border-white/10 p-8 reveal rounded-sm" style="transition-delay: 100ms;">
+                    <h3 class="font-bold uppercase tracking-widest text-sm mb-4 border-b border-white/10 pb-4">Shipping & Delivery</h3>
+                    <p class="text-sm opacity-60 font-light leading-relaxed">We ship our pieces nationwide across India. Orders are processed within 24 hours of payment confirmation. Standard transit time is 4-7 business days depending on your location.</p>
+                </div>
+                
+                <div class="tilt-card interactive-element bg-[#111] border border-white/10 p-8 reveal rounded-sm" style="transition-delay: 200ms;">
+                    <h3 class="font-bold uppercase tracking-widest text-sm mb-4 border-b border-white/10 pb-4">Sizing & Fit</h3>
+                    <p class="text-sm opacity-60 font-light leading-relaxed">Our pieces are designed with a modern, slightly relaxed streetwear fit. We highly recommend checking the detailed Size Guide available in each product's details before ordering.</p>
+                </div>
+
+                <div class="tilt-card interactive-element bg-[#111] border border-white/10 p-8 reveal rounded-sm" style="transition-delay: 300ms;">
+                    <h3 class="font-bold uppercase tracking-widest text-sm mb-4 border-b border-white/10 pb-4">Payment Process</h3>
+                    <p class="text-sm opacity-60 font-light leading-relaxed">All transactions are handled securely via direct UPI when you connect with us on WhatsApp. Cash on Delivery (COD) is not supported for these limited runs.</p>
+                </div>
+
+                <div class="tilt-card interactive-element bg-[#111] border border-white/10 p-8 reveal rounded-sm" style="transition-delay: 400ms;">
+                    <h3 class="font-bold uppercase tracking-widest text-sm mb-4 border-b border-white/10 pb-4">Returns & Policy</h3>
+                    <p class="text-sm opacity-60 font-light leading-relaxed">Due to the extreme scarcity of these drops, all sales are final. Returns are only authorized in the rare event of a manufacturing defect upon arrival.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. INSTAGRAM ARCHIVE GRID -->
+    <section class="py-20 md:py-32 px-4 md:px-6 bg-black border-b border-white/5">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col items-center text-center mb-10 md:mb-16 reveal">
+                <div class="dual-lang-lock flex-col mb-4">
+                    <span class="meetei-mayek text-2xl md:text-3xl opacity-60">ꯅꯤꯡꯁꯤꯡꯕ</span>
+                    <span class="mono text-[11px] opacity-40 uppercase tracking-[0.8em] mt-2">Visual Logs</span>
+                </div>
+                <h2 class="text-4xl md:text-6xl font-black heading-bold italic tracking-tighter mb-8 uppercase">The Archive</h2>
+                
+                <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" rel="noopener noreferrer" class="haptic-btn btn-outline interactive-element flex items-center justify-center gap-3 border border-white/20 px-8 py-4 text-[11px] font-bold uppercase tracking-widest transition-all rounded-sm audio-trigger">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    <span class="mm-sub text-white/50">@projecteramdam.official</span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-3 md:grid-cols-4 gap-1 md:gap-3">
+                <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" class="ig-post aspect-square bg-zinc-900 relative group overflow-hidden border border-white/5 reveal rounded-sm interactive-element tilt-card" style="transition-delay: 100ms;">
+                    <img src="IMAGE/KHAMBA FRONT.png" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale group-hover:grayscale-0" onerror="this.src='BLACK.png'">
+                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                </a>
+                <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" class="ig-post aspect-square bg-zinc-900 relative group overflow-hidden border border-white/5 reveal rounded-sm interactive-element tilt-card" style="transition-delay: 200ms;">
+                    <img src="IMAGE/Rooted in Legend.jpg" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale group-hover:grayscale-0" onerror="this.src='https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=2080&auto=format&fit=crop'">
+                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                </a>
+                <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" class="ig-post aspect-square bg-zinc-900 relative group overflow-hidden border border-white/5 reveal rounded-sm interactive-element tilt-card" style="transition-delay: 300ms;">
+                    <img src="IMAGE/KHAMBA BACK.png" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale group-hover:grayscale-0" onerror="this.src='BLACK.png'">
+                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                </a>
+                <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" class="ig-post aspect-square bg-zinc-900 relative group overflow-hidden border border-white/5 hidden md:block reveal rounded-sm interactive-element tilt-card" style="transition-delay: 400ms;">
+                    <img src="IMAGE/LAI FRONT.png" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale group-hover:grayscale-0" onerror="this.src='BLACK.png'">
+                    <div class="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. JOIN THE COMMUNITY -->
+    <section class="relative py-24 md:py-32 bg-[#050505] text-center overflow-hidden border-b border-white/5">
+        <div class="max-w-xl mx-auto px-6 relative z-10 reveal">
+            <div class="dual-lang-lock flex-col mb-4">
+                <span class="meetei-mayek text-2xl md:text-3xl opacity-60">ꯄꯨꯟꯁꯤꯟꯕ</span>
+                <span class="mono text-[11px] opacity-40 uppercase tracking-[0.8em] mt-2">Join the Community</span>
+            </div>
+            
+            <h2 class="text-4xl md:text-6xl font-black heading-bold italic mb-4 text-white tracking-tighter uppercase">Join the <br/>Journey</h2>
+            <p class="text-sm md:text-base opacity-60 mb-10 uppercase tracking-widest leading-relaxed text-white">Witness the next chapter of our shared heritage. Sign up to know when we drop.</p>
+            <form id="newsletter-form" class="flex flex-col md:flex-row gap-3">
+                <input type="text" required placeholder="[ ꯄꯥꯎ | ENTER CONTACT ]" class="flex-1 bg-black/80 border border-white/20 px-6 py-4 mono text-[12px] focus:outline-none uppercase tracking-widest text-white backdrop-blur-md rounded-sm interactive-element">
+                <button type="submit" class="haptic-btn btn-solid interactive-element dual-lang-lock bg-white text-black px-10 py-4 transition-all rounded-sm audio-trigger">
+                    <span class="meetei-mayek text-[18px] font-bold">ꯌꯥꯎꯕ</span> 
+                    <span class="mono text-[12px] uppercase font-bold text-black/50">Join</span>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 9. SCARCITY -->
+    <section class="py-24 md:py-48 px-6 text-center overflow-hidden border-b border-white/5 bg-black reveal flex flex-col items-center">
+        <span class="meetei-mayek text-3xl md:text-4xl opacity-40 mb-4 block">ꯑꯈꯟꯕ</span>
+        <h2 class="text-5xl md:text-[12rem] font-black heading-bold italic leading-none mb-6 mobile-heading uppercase">
+            Limited <br/> <span class="text-outline">Drop</span>
+        </h2>
+        <p class="mono text-[11px] md:text-sm tracking-[0.8em] uppercase opacity-40 font-bold">Once sold out, they are gone.</p>
     </section>
 
     <!-- FOOTER -->
-    <footer class="py-64 px-6 text-center bg-black border-t border-white/10">
-        <div class="w-32 h-32 mx-auto mb-24 cursor-pointer audio-trigger" onclick="window.scrollTo(0,0)">
-            <img src="WHITE.jpg" class="w-full h-full object-contain">
+    <footer class="py-12 px-6 text-center bg-[#050505] relative z-10">
+        <div class="cursor-pointer inline-block hover:scale-105 transition-transform audio-trigger interactive-element" onclick="window.scrollTo(0,0)">
+            <div class="w-12 h-12 mx-auto mb-8 border border-white/20 flex items-center justify-center rounded-sm bg-white/5">
+                <span class="font-black text-base text-white">PE</span>
+            </div>
         </div>
-        <div class="flex justify-center gap-24 text-2xl font-black opacity-40 mb-24 tracking-[0.5em]">
-            <a href="https://www.instagram.com/projecteramdam.official/" target="_blank">IG</a>
-            <a href="#">WA</a>
+        <div class="flex justify-center gap-10 text-[11px] uppercase tracking-widest font-bold opacity-40 mb-6">
+            <a href="https://www.instagram.com/projecteramdam.official/" target="_blank" rel="noopener noreferrer" class="hover:opacity-100 transition-opacity underline underline-offset-4 audio-trigger interactive-element">Instagram</a>
+            <a href="https://wa.me/91XXXXXXXXXX?text=%EA%AF%88%EA%AF%A8%EA%AF%B0%EA%AF%A8%EA%AF%9D%EA%AF%96%EA%AF%B0%EA%AF%A8%20%7C%20Hello%20Project%20Eramdam,%20I%20have%20an%20enquiry." target="_blank" rel="noopener noreferrer" class="hover:opacity-100 transition-opacity underline underline-offset-4 audio-trigger interactive-element">WhatsApp</a>
         </div>
-        <p class="meetei-mayek text-6xl font-black opacity-30 mb-12">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</p>
-        <p class="mono text-[18px] font-black opacity-20 uppercase">EST. 2026 // KANGLEIPAK</p>
-        <div class="mono text-[18px] font-black opacity-40 uppercase tracking-[0.4em] mt-32 border-2 border-white/20 inline-block px-16 py-10 bg-white/5" id="live-clock">
-            [ --:--:-- IST ]
-        </div>
+        <p class="meetei-mayek text-[14px] opacity-30 uppercase tracking-widest mb-1 flex justify-center">ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ</p>
+        <p class="mono text-[9px] opacity-20 uppercase tracking-widest leading-none">EST. 2026 // CRAFTED IN MANIPUR, INDIA</p>
+        
+        <!-- LIVE DIGITAL CLOCK -->
+        <p class="mono text-[10px] opacity-40 uppercase tracking-widest leading-none mt-6 border border-white/10 inline-block px-4 py-2 bg-white/5 rounded-sm" id="live-clock">
+            [ IMPHAL : --:--:-- IST ]
+        </p>
     </footer>
 
-    <!-- PRODUCT HUD -->
-    <div id="hud-modal" class="custom-modal fixed inset-0 z-[120] hidden items-center justify-center p-0 md:p-12" onclick="if(event.target === this) closeModal('hud-modal')">
-        <div class="w-full max-w-6xl bg-black border border-white/30 relative flex flex-col md:flex-row h-full md:h-[85vh] overflow-hidden rounded-none cursor-default">
-            <button onclick="closeModal('hud-modal')" class="absolute top-12 right-12 z-50 bg-black p-8 border border-white/30 audio-trigger">
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    <!-- PRODUCT HUD MODAL -->
+    <div id="hud-modal" class="custom-modal fixed inset-0 z-[120] hidden items-center justify-center p-4 md:p-10 cursor-pointer" onclick="if(event.target === this) closeModal('hud-modal')">
+        <div class="w-full max-w-6xl bg-[#080808] border border-white/10 relative flex flex-col md:flex-row h-[85vh] md:h-[80vh] shadow-2xl shadow-black/50 modal-animate-in overflow-hidden rounded-sm cursor-default">
+            
+            <button onclick="closeModal('hud-modal')" class="absolute top-4 right-4 md:top-6 md:right-6 z-50 bg-black/50 p-4 rounded-full border border-white/20 hover:bg-white hover:text-black transition-colors cursor-pointer backdrop-blur-sm audio-trigger interactive-element">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
-            <div class="w-full md:w-3/5 h-1/2 md:h-full bg-zinc-950 border-b md:border-b-0 md:border-r border-white/10 relative">
-                <div id="hud-carousel" class="w-full h-full flex overflow-x-auto snap-x-mandatory no-scrollbar scroll-smooth"></div>
+            
+            <div class="w-full md:w-3/5 h-1/2 md:h-full bg-[#0a0a0a] border-b md:border-b-0 md:border-r border-white/10 relative group">
+                <div id="hud-carousel" class="w-full h-full flex overflow-x-auto snap-x-mandatory no-scrollbar scroll-smooth interactive-element"></div>
+                <div class="absolute bottom-4 left-0 w-full flex justify-center gap-2 z-10" id="hud-dots"></div>
+                <button id="carousel-left-btn" onclick="scrollCarousel(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-full border border-white/20 hover:bg-white hover:text-black transition-colors hidden md:block opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10 audio-trigger interactive-element"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <button id="carousel-right-btn" onclick="scrollCarousel(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-full border border-white/20 hover:bg-white hover:text-black transition-colors hidden md:block opacity-0 group-hover:opacity-100 backdrop-blur-sm z-10 audio-trigger interactive-element"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
             </div>
-            <div class="w-full md:w-2/5 h-1/2 md:h-full overflow-y-auto p-16 md:p-24 flex flex-col bg-black">
-                <div class="mb-24 border-b border-white/20 pb-20">
-                    <span class="mono text-base font-black opacity-40" id="hud-id">ID</span>
-                    <h3 class="text-6xl md:text-[10rem] heading-black mt-10 mb-12" id="hud-title">PRODUCT</h3>
-                    <p class="mono text-6xl font-black text-white" id="hud-price">₹0</p>
+
+            <div class="w-full md:w-2/5 h-1/2 md:h-full overflow-y-auto modal-scroll p-6 md:p-10 flex flex-col bg-[#050505]">
+                
+                <div class="mb-6 border-b border-white/10 pb-6">
+                    <span class="mono text-[10px] md:text-[11px] opacity-40 uppercase tracking-[0.4em]" id="hud-id">ARTIFACT_ID</span>
+                    <h3 class="text-3xl md:text-5xl font-black heading-bold italic mt-2 mb-4 tracking-tighter text-white uppercase" id="hud-title">PRODUCT</h3>
+                    <p class="mono text-2xl font-bold text-white" id="hud-price">₹0</p>
+                    
+                    <!-- SCARCITY ENGINE -->
+                    <div id="hud-scarcity" class="text-red-500 flex items-center gap-2 mt-3 animate-pulse">
+                        <span id="hud-scarcity-mm" class="meetei-mayek text-[15px]">ꯂꯦꯝꯍꯧꯔꯤꯕ: </span>
+                        <span class="mono text-[10px] font-bold uppercase tracking-widest leading-none ml-1" id="hud-scarcity-en">ONLY X LEFT</span>
+                    </div>
                 </div>
-                <div class="flex-grow space-y-24">
-                    <p class="text-4xl opacity-70 font-light" id="hud-desc"></p>
-                    <div class="mono text-2xl font-black text-white/50 border-l border-white/40 pl-12 py-10 bg-white/5 uppercase" id="hud-specs"></div>
+
+                <div class="space-y-6 flex-grow">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="mono text-[10px] opacity-30 uppercase tracking-widest border-l-2 border-white/30 pl-2">The Story</span>
+                            <button id="hud-lore-btn" onclick="openLore()" class="haptic-btn btn-outline interactive-element dual-lang-lock border border-white/20 px-3 py-1.5 transition-all hidden cursor-pointer rounded-sm audio-trigger">
+                                <span class="meetei-mayek text-[13px] font-bold">ꯋꯥꯔꯤ</span> 
+                                <span class="mono text-[9px] uppercase tracking-widest text-white/50 font-bold">Read Lore</span>
+                            </button>
+                        </div>
+                        <p class="text-sm opacity-80 leading-relaxed font-light pl-2" id="hud-desc">Details...</p>
+                    </div>
+                    <div>
+                        <span class="mono text-[10px] opacity-30 uppercase block mb-2 tracking-widest border-l-2 border-white/30 pl-2">Technical Specs</span>
+                        <p class="mono text-[11px] font-bold text-white/90 pl-2" id="hud-specs">SPECS_LOADING</p>
+                    </div>
                 </div>
-                <div class="mt-32">
-                    <button id="hud-add-cart-btn" class="haptic-btn w-full bg-white text-black py-16 audio-trigger flex items-center justify-center gap-10">
-                        <span class="meetei-mayek text-7xl font-black">ꯍꯥꯞꯆꯤꯟꯕ</span>
-                        <span class="mono font-black uppercase text-xl text-black/30">Add</span>
+                
+                <div class="mt-8 pt-6 border-t border-white/10 space-y-3">
+                    <button onclick="openSizeGuide()" class="haptic-btn btn-outline interactive-element dual-lang-lock w-full border border-white/20 bg-transparent text-white py-4 transition-colors cursor-pointer rounded-sm audio-trigger">
+                        <span class="meetei-mayek text-[16px] font-bold">ꯆꯥꯡ</span> 
+                        <span class="mono font-bold uppercase text-[11px] tracking-widest text-white/50">Size Guide</span>
+                    </button>
+                    <!-- Pointer events auto added to ensure clicks aren't blocked by neon particles -->
+                    <button id="hud-add-cart-btn" class="relative z-10 pointer-events-auto haptic-btn btn-solid interactive-element dual-lang-lock w-full bg-white text-black py-5 transition-all rounded-sm audio-trigger">
+                        <span class="meetei-mayek text-[18px] font-bold text-black">ꯍꯥꯞꯆꯤꯟꯕ</span> 
+                        <span class="mono font-black uppercase text-[12px] tracking-[0.2em] text-black/50">Add to Bag</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- AI ORACLE -->
-    <div id="ai-modal" class="custom-modal fixed inset-0 z-[110] hidden items-center justify-center p-0 md:p-12" onclick="if(event.target === this) closeModal('ai-modal')">
-        <div class="bg-black border border-white/30 w-full max-w-2xl h-full md:h-[80vh] flex flex-col shadow-2xl overflow-hidden rounded-none">
-            <div class="p-16 border-b border-white/20 flex justify-between items-center bg-black">
-                <div class="flex items-center gap-12">
-                    <img src="WHITE.jpg" class="w-16 h-16 object-contain">
+    <!-- LORE MODAL -->
+    <div id="lore-modal" class="fixed inset-0 z-[130] hidden items-center justify-center p-4 backdrop-blur-md bg-black/80 cursor-pointer" onclick="if(event.target === this) closeModal('lore-modal')">
+        <div class="w-full max-w-xl bg-[#111] border border-white/20 p-8 md:p-12 relative shadow-2xl modal-animate-in rounded-sm cursor-default max-h-[85vh] flex flex-col">
+            <button onclick="closeModal('lore-modal')" class="absolute top-4 right-4 opacity-40 hover:opacity-100 p-4 bg-white/5 rounded-full z-50 cursor-pointer audio-trigger interactive-element"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            <div class="text-center mb-8 mt-2 border-b border-white/10 pb-6">
+                <span class="meetei-mayek text-2xl opacity-60 mb-2 block">ꯋꯥꯔꯤ</span>
+                <h3 class="text-3xl font-black heading-bold italic uppercase tracking-tighter">Artifact Lore</h3>
+            </div>
+            <div class="overflow-y-auto modal-scroll pr-4 flex-1">
+                <p id="lore-content" class="text-base md:text-lg text-white/80 leading-relaxed font-light"></p>
+            </div>
+            <button onclick="closeModal('lore-modal')" class="mt-8 w-full haptic-btn btn-outline interactive-element dual-lang-lock border border-white/20 bg-white/5 text-white py-4 transition-all cursor-pointer rounded-sm audio-trigger">
+                <span class="meetei-mayek text-[15px] font-bold">ꯍꯟꯕ</span> 
+                <span class="mono font-bold uppercase tracking-widest text-[11px] text-white/50">Return</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- CART MODAL -->
+    <div id="cart-modal" class="custom-modal fixed inset-0 z-[140] hidden items-center justify-end p-0 md:p-4 cursor-pointer" onclick="if(event.target === this) closeModal('cart-modal')">
+        <div class="w-full md:w-96 bg-[#080808] border-l md:border border-white/10 h-full md:h-[90vh] shadow-2xl modal-animate-in flex flex-col relative cursor-default rounded-sm">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center bg-[#111]">
+                <h3 class="font-black heading-bold italic text-2xl tracking-tighter uppercase">Your Artifacts</h3>
+                <button onclick="closeModal('cart-modal')" class="opacity-40 hover:opacity-100 p-4 bg-white/5 rounded-full border border-transparent hover:border-white/20 cursor-pointer audio-trigger interactive-element"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div id="cart-items-container" class="flex-1 overflow-y-auto modal-scroll p-6 space-y-4"></div>
+            <div class="p-6 border-t border-white/10 bg-[#111]">
+                <div class="flex justify-between items-center mb-6 mono text-sm font-bold text-white">
+                    <span>Total Estimate</span>
+                    <span id="cart-total">₹0</span>
+                </div>
+                <button id="checkout-btn" onclick="checkoutCart()" class="haptic-btn btn-solid interactive-element dual-lang-lock w-full bg-white text-black py-5 transition-all rounded-sm audio-trigger">
+                    <span class="meetei-mayek text-[16px] font-bold text-black">ꯂꯩꯕ</span> 
+                    <span class="mono font-black uppercase text-[12px] tracking-[0.2em] text-black/50">Checkout</span>
+                </button>
+                <p class="text-center mono text-[9px] opacity-30 mt-3 uppercase">Size & Payment handled directly with our team.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIZE GUIDE MODAL -->
+    <div id="size-guide-modal" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 backdrop-blur-md bg-black/80 cursor-pointer" onclick="if(event.target === this) closeModal('size-guide-modal')">
+        <div class="w-full max-w-md bg-[#111] border border-white/20 p-6 md:p-10 relative shadow-2xl modal-animate-in rounded-sm cursor-default">
+            <button onclick="closeModal('size-guide-modal')" class="absolute top-4 right-4 opacity-40 hover:opacity-100 p-4 bg-white/5 rounded-full z-50 cursor-pointer audio-trigger interactive-element"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            <div class="text-center mb-8 mt-2 border-b border-white/10 pb-6">
+                <div class="flex flex-col items-center gap-1 mb-2">
+                    <span class="meetei-mayek text-2xl opacity-60">ꯆꯥꯡ</span>
+                    <span class="mono text-[11px] opacity-40 uppercase tracking-[0.6em]">Size Guide</span>
+                </div>
+                <h3 class="text-2xl font-black heading-bold italic uppercase">Measurements</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left mono text-[11px] md:text-xs">
+                    <thead>
+                        <tr class="border-b border-white/20 opacity-60">
+                            <th class="py-3 font-normal"><div class="dual-lang-lock-left"><span class="meetei-mayek text-base">ꯃꯆꯥꯡ</span> <span class="opacity-50 text-[9px]">SIZE</span></div></th>
+                            <th class="py-3 font-normal"><div class="dual-lang-lock-left"><span class="meetei-mayek text-base">ꯊꯕꯥꯛ</span> <span class="opacity-50 text-[9px]">CHEST(IN)</span></div></th>
+                            <th class="py-3 font-normal"><div class="dual-lang-lock-left"><span class="meetei-mayek text-base">ꯑꯁꯥꯡꯕ</span> <span class="opacity-50 text-[9px]">LENGTH(IN)</span></div></th>
+                            <th class="py-3 font-normal"><div class="dual-lang-lock-left"><span class="meetei-mayek text-base">ꯃꯈꯨꯠ</span> <span class="opacity-50 text-[9px]">SLEEVE(IN)</span></div></th>
+                        </tr>
+                    </thead>
+                    <tbody class="opacity-80">
+                        <tr class="border-b border-white/5 hover:bg-white/5">
+                            <td class="py-4 font-bold text-white">S</td>
+                            <td class="py-4">38</td>
+                            <td class="py-4">26.5</td>
+                            <td class="py-4">8.5</td>
+                        </tr>
+                        <tr class="border-b border-white/5 hover:bg-white/5">
+                            <td class="py-4 font-bold text-white">M</td>
+                            <td class="py-4">40</td>
+                            <td class="py-4">27.5</td>
+                            <td class="py-4">9</td>
+                        </tr>
+                        <tr class="border-b border-white/5 hover:bg-white/5">
+                            <td class="py-4 font-bold text-white">L</td>
+                            <td class="py-4">42</td>
+                            <td class="py-4">28.5</td>
+                            <td class="py-4">9.5</td>
+                        </tr>
+                        <tr class="border-b border-white/5 hover:bg-white/5">
+                            <td class="py-4 font-bold text-white">XL</td>
+                            <td class="py-4">44</td>
+                            <td class="py-4">29.5</td>
+                            <td class="py-4">10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="closeModal('size-guide-modal')" class="mt-8 w-full haptic-btn btn-outline interactive-element dual-lang-lock border border-white/20 bg-white/5 text-white py-4 transition-all cursor-pointer rounded-sm audio-trigger">
+                <span class="meetei-mayek text-[15px] font-bold">ꯍꯟꯕ</span> 
+                <span class="mono font-bold uppercase tracking-widest text-[11px] text-white/50">Return</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- AI ORACLE MODAL -->
+    <div id="ai-modal" class="custom-modal fixed inset-0 z-[110] hidden items-center justify-center p-4 cursor-pointer" onclick="if(event.target === this) closeModal('ai-modal')">
+        <div class="bg-black border border-white/10 w-full max-w-lg h-[80vh] md:h-[70vh] flex flex-col relative shadow-2xl overflow-hidden modal-animate-in rounded-sm cursor-default">
+            <div class="p-4 md:p-6 border-b border-white/10 flex justify-between items-center bg-zinc-950">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 md:w-10 md:h-10 border border-white/20 flex items-center justify-center rounded-sm bg-white/5"><span class="font-black text-[12px]">PE</span></div>
                     <div class="flex flex-col">
-                        <span class="meetei-mayek text-5xl font-black">ꯋꯥꯔꯤ</span>
-                        <span class="font-black uppercase tracking-[0.3em] text-[12px] opacity-30 mt-4">Heritage Oracle</span>
+                        <span class="meetei-mayek text-base leading-none text-white/80">ꯋꯥꯔꯤ</span>
+                        <span class="font-bold uppercase tracking-widest text-[9px] opacity-50 mt-1">The Heritage Oracle</span>
                     </div>
                 </div>
-                <button onclick="closeModal('ai-modal')" class="p-4 opacity-50"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+                <button onclick="closeModal('ai-modal')" class="opacity-40 hover:opacity-100 p-4 bg-white/5 rounded-full cursor-pointer audio-trigger interactive-element"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
             </div>
-            <div id="chat-history" class="flex-1 overflow-y-auto p-16 space-y-24 mono text-2xl scroll-smooth bg-black">
-                <div class="bg-white/5 p-12 border-l border-white/40 italic opacity-80">Sync Established. How may I assist?</div>
+            <div id="chat-history" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 text-[13px] mono font-light scroll-smooth modal-scroll">
+                <div class="bg-white/5 p-4 border-l-2 border-white/20 self-start italic opacity-80">Hello. I am the Oracle of Eramdam. Ask me about our shared land, our history, or our clothes. How can I help?</div>
             </div>
-            <div class="p-16 bg-black border-t border-white/20">
-                <form id="ai-form" class="flex gap-10">
-                    <input type="text" id="ai-input" placeholder="[ ASK... ]" class="flex-1 bg-black border-2 border-white/20 px-12 py-10 text-2xl focus:border-white focus:outline-none uppercase mono text-white">
-                    <button type="submit" class="haptic-btn bg-white text-black px-20 py-10">
-                        <span class="meetei-mayek text-5xl font-black">ꯊꯥꯕ</span>
+            <div id="ai-typing" class="px-6 py-2 hidden"><div class="flex gap-1"><div class="w-1 h-1 bg-white rounded-full animate-bounce"></div><div class="w-1 h-1 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div><div class="w-1 h-1 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div></div></div>
+            <div class="p-4 bg-zinc-950 border-t border-white/10">
+                <form id="ai-form" class="flex gap-2">
+                    <input type="text" id="ai-input" placeholder="[ ꯍꯪꯕ | ASK... ]" class="flex-1 bg-black border border-white/10 px-4 py-3 text-[11px] focus:outline-none uppercase mono rounded-sm interactive-element">
+                    <button type="submit" class="haptic-btn btn-solid interactive-element dual-lang-lock bg-white text-black px-6 transition-all rounded-sm audio-trigger">
+                        <span class="meetei-mayek text-[15px] font-bold text-black">ꯊꯥꯕ</span> 
+                        <span class="mono font-bold uppercase text-[11px] text-black/50">Send</span>
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- SYSTEM TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none w-max max-w-[90vw]"></div>
+
     <!-- SCRIPT LOGIC -->
     <script>
-        // --- 0. MATRIX ENGINE (100% CANVAS) ---
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
-        const mmChars = 'ꯀꯁꯂꯃꯄꯅꯆꯇꯈꯉꯊꯋꯌꯍꯎꯏꯐꯑꯒꯓꯔꯕꯖꯗꯘꯙꯚꯛꯜꯝꯞꯟꯠꯡꯢ';
-        let fontSize = 24;
-        let columns;
-        let drops;
-
-        function initMatrix() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            columns = Math.floor(canvas.width / fontSize);
-            drops = Array(columns).fill(1);
-        }
-
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${fontSize}px 'Noto Sans Meetei Mayek'`;
-
-            for (let i = 0; i < drops.length; i++) {
-                const text = mmChars[Math.floor(Math.random() * mmChars.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) drops[i] = 0;
-                drops[i]++;
+        // --- 0. CUSTOM CURSOR LOGIC (DESKTOP ONLY) ---
+        const dot = document.getElementById('cursor-dot');
+        const ring = document.getElementById('cursor-ring');
+        
+        if (window.matchMedia("(pointer: fine)").matches) {
+            // Using requestAnimationFrame for buttery smooth performance without lag
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+            
+            function renderCursor() {
+                dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+                ring.animate({ transform: `translate(${mouseX}px, ${mouseY}px)` }, { duration: 100, fill: "forwards" });
+                requestAnimationFrame(renderCursor);
             }
+            requestAnimationFrame(renderCursor);
+
+            const addHover = () => { dot.classList.add('hovered'); ring.classList.add('hovered'); };
+            const removeHover = () => { dot.classList.remove('hovered'); ring.classList.remove('hovered'); };
+            
+            const bindCursors = () => {
+                document.querySelectorAll('.interactive-element, a, button').forEach(el => {
+                    el.removeEventListener('mouseenter', addHover);
+                    el.removeEventListener('mouseleave', removeHover);
+                    el.addEventListener('mouseenter', addHover);
+                    el.addEventListener('mouseleave', removeHover);
+                });
+            };
+            bindCursors();
+            new MutationObserver(bindCursors).observe(document.body, { childList: true, subtree: true });
         }
 
-        window.addEventListener('resize', initMatrix);
-        initMatrix();
-        setInterval(drawMatrix, 60);
-
-        // --- 1. AUDIO (MECHANICAL TICK) ---
+        // --- 1. WEB AUDIO SYNTHESIZER (iPhone Keyboard "Tick" Sound) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playClickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const gainNode = audioCtx.createGain();
+            // High frequency, short decay mimics an iPhone click
             osc.type = 'sine'; 
-            osc.frequency.setValueAtTime(1600, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.02); 
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.02); 
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.02);
+            osc.frequency.setValueAtTime(1000, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.05); 
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); 
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
         }
+
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.audio-trigger') || e.target.closest('button')) playClickSound();
+            if (e.target.closest('.audio-trigger') || e.target.closest('.haptic-btn') || e.target.closest('.product-card')) {
+                playClickSound();
+            }
         });
 
-        // --- 2. PC CURSOR ---
-        const dot = document.getElementById('cursor-dot');
-        const ring = document.getElementById('cursor-ring');
-        if (window.matchMedia("(pointer: fine)").matches) {
-            let mX = 0, mY = 0;
-            document.addEventListener('mousemove', (e) => { mX = e.clientX; mY = e.clientY; });
-            function loop() {
-                dot.style.transform = `translate3d(${mX}px, ${mY}px, 0)`;
-                ring.style.transform = `translate3d(${mX}px, ${mY}px, 0)`;
-                requestAnimationFrame(loop);
-            }
-            loop();
-            document.querySelectorAll('a, button, .audio-trigger, .product-card').forEach(el => {
-                el.addEventListener('mouseenter', () => { ring.classList.add('hovered'); });
-                el.addEventListener('mouseleave', () => { ring.classList.remove('hovered'); });
-            });
+        // --- 2. NEON KINETIC PARTICLES (CLICK ONLY TO FIX SCROLL LAG) ---
+        const mmChars = 'ꯀꯁꯂꯃꯄꯅꯆꯇꯈꯉꯊꯋꯌꯍꯎꯏꯐꯑꯒꯓꯔꯕꯖꯗꯘꯙꯚꯛꯜꯝꯞꯟꯠꯡꯢ';
+        const neonColors = ['#00FFFF', '#FF00FF', '#39FF14', '#FF073A', '#FFEA00'];
+        
+        function spawnParticle(x, y) {
+            // Strict DOM Limiter
+            if (document.querySelectorAll('.neon-particle').length > 15) return;
+
+            const el = document.createElement('div');
+            el.className = 'neon-particle';
+            el.innerText = mmChars[Math.floor(Math.random() * mmChars.length)];
+            
+            const randColor = neonColors[Math.floor(Math.random() * neonColors.length)];
+            el.style.setProperty('--neon-color', randColor);
+            
+            const offsetX = (Math.random() - 0.5) * 60;
+            const offsetY = (Math.random() - 0.5) * 60;
+            
+            el.style.left = (x + offsetX) + 'px';
+            el.style.top = (y + offsetY) + 'px';
+            el.style.animationDuration = (0.6 + Math.random() * 0.4) + 's';
+            
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000); 
         }
 
-        // --- 3. LOADER ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const lText = document.getElementById('glitch-text');
-            const lSub = document.getElementById('glitch-sub');
-            let iters = 0;
-            const timer = setInterval(() => {
-                lText.innerText = Array.from({length: 6}).map(() => mmChars[Math.floor(Math.random() * mmChars.length)]).join('');
-                iters++;
-                if(iters === 10) lSub.style.opacity = '1';
-                if(iters > 20) {
-                    clearInterval(timer);
-                    lText.innerText = 'ꯄ꯭ꯔꯣꯖꯦꯛꯠ';
-                    lSub.innerText = 'SYNC_COMPLETE';
-                    setTimeout(() => {
-                        document.getElementById('glitch-loader').style.opacity = '0';
-                        setTimeout(() => document.getElementById('glitch-loader').remove(), 800);
-                    }, 800);
-                }
-            }, 80);
+        // ONLY fire on click. Removes massive touchmove lag on mobile.
+        document.addEventListener('click', (e) => {
+            for(let i=0; i<3; i++) spawnParticle(e.clientX, e.clientY);
         });
 
-        // --- 4. STORE ---
-        const products = [
-            { id: 'PE_001', name: 'Khamba Front', price: '899', image: 'IMAGE/KHAMBA FRONT.png', category: 'Guardian', description: 'Unyielding strength cast in luxury cotton.', specs: '240 GSM Luxury' },
-            { id: 'PE_002', name: 'Khamba Back', price: '1399', image: 'IMAGE/KHAMBA BACK.png', category: 'Guardian', description: 'Rewriting legends for the modern streets.', specs: '440 GSM Terry' },
-            { id: 'PE_003', name: 'Lai Concept', price: '799', image: 'IMAGE/LAI FRONT.png', category: 'Scroll', description: 'Geometric protectors of the valley.', specs: 'Premium Cotton' },
-            { id: 'PE_004', name: 'Siroi Shadow', price: '849', image: 'BLACK.png', category: 'Scroll', description: 'A silhouette of mountain resilience.', specs: '240 GSM Luxury' }
+        // --- 3. 3D TILT ENGINE (STRICTLY DESKTOP ONLY TO PREVENT LAG) ---
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.matchMedia("(pointer: fine)").matches) {
+                const tiltCards = document.querySelectorAll('.tilt-card');
+                tiltCards.forEach(card => {
+                    card.addEventListener('mousemove', e => {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        let rotateX = ((y - centerY) / centerY) * -15; 
+                        let rotateY = ((x - centerX) / centerX) * 15;
+                        
+                        rotateX = Math.max(-15, Math.min(15, rotateX));
+                        rotateY = Math.max(-15, Math.min(15, rotateY));
+
+                        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                        card.style.boxShadow = `${-rotateY * 2}px ${rotateX * 2}px 30px rgba(0, 212, 255, 0.15)`;
+                    });
+                    const resetTilt = () => {
+                        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+                        card.style.boxShadow = 'none';
+                    };
+                    card.addEventListener('mouseleave', resetTilt);
+                });
+            }
+        });
+
+        // --- 4. DYNAMIC FULL-SCREEN GLITCH LOADER LOGIC ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const loader = document.getElementById('glitch-loader');
+            const loaderText = document.getElementById('glitch-text');
+            const loaderBg = document.getElementById('glitch-bg');
+            const loaderSub = document.getElementById('glitch-sub');
+            
+            // Generate exact amount of background characters to fill screen without DOM overload
+            const bgLength = window.innerWidth < 768 ? 400 : 1200; 
+            
+            let iterations = 0;
+            const maxIterations = 20; // Reduce load time slightly for better UX
+            
+            loaderSub.style.opacity = '1';
+            
+            const interval = setInterval(() => {
+                loaderText.innerText = Array.from({length: 12}).map(() => mmChars[Math.floor(Math.random() * mmChars.length)]).join('');
+                loaderBg.innerText = Array.from({length: bgLength}).map(() => mmChars[Math.floor(Math.random() * mmChars.length)]).join('');
+                
+                iterations++;
+                
+                if (iterations > maxIterations) {
+                    clearInterval(interval);
+                    loaderText.innerText = 'ꯄ꯭ꯔꯣꯖꯦꯛꯠ ꯏꯔꯝꯗꯝ';
+                    loaderBg.style.opacity = '0'; 
+                    loaderBg.style.transition = 'opacity 0.5s ease';
+                    loaderSub.innerText = 'ACCESS GRANTED';
+                    
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.style.display = 'none', 600);
+                    }, 800); 
+                }
+            }, 80); // 80ms interval = ~12 FPS (Less CPU load than 60ms)
+        });
+
+        // --- 5. LIVE DIGITAL CLOCK LOGIC ---
+        function updateClock() {
+            const clock = document.getElementById('live-clock');
+            if(!clock) return;
+            const now = new Date();
+            const options = { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const timeString = now.toLocaleTimeString('en-US', options);
+            clock.innerText = `[ IMPHAL : ${timeString} IST ]`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 6. SCARCITY ENGINE (MATHEMATICAL HASH) ---
+        function getScarcityCount(id) {
+            const date = new Date();
+            const seed = id + date.getFullYear() + date.getMonth() + date.getDate();
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+            return Math.abs(hash) % 5 + 1; // Returns 1 to 5
+        }
+
+        // --- 7. CORE STORE LOGIC ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { 
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        const GOOGLE_SHEETS_CSV_URL = ""; 
+        const WHATSAPP_NUMBER = "91XXXXXXXXXX"; 
+        
+        let cart = [];
+        try {
+            const savedCart = localStorage.getItem('pe_cart');
+            if (savedCart) cart = JSON.parse(savedCart);
+        } catch(e) { cart = []; }
+
+        const fallbackProducts = [
+            { id: 'PE_001', name: 'Khamba Front Edition', price: '899', image: 'IMAGE/KHAMBA FRONT.png|IMAGE/KHAMBA BACK.png', category: 'Guardian', description: 'The legendary Khamba front profile. Represents unyielding strength.', specs: '240 GSM Luxury Cotton', lore: 'According to the epic Khamba Thoibi, Khamba was an orphan of the Khuman clan who possessed superhuman strength. His tale is deeply woven into the spiritual fabric of Moirang, representing the ultimate triumph of courage and destiny.' },
+            { id: 'PE_002', name: 'Khamba Back Edition', price: '1399', image: 'IMAGE/KHAMBA BACK.png', category: 'Guardian', description: 'Khamba heavy-weight rear graphic armor designed for endurance.', specs: '440 GSM French Terry', lore: 'The imagery on the back portrays the protective stance of the ancient heroes. Warriors of Kangleipak wore their allegiances heavily, a tradition we translate into this dense, armor-like French Terry.' },
+            { id: 'PE_003', name: 'Lai Front Concept', price: '799', image: 'IMAGE/LAI FRONT.png', category: 'Scroll', description: 'Inspired by the ancient Lai deities. A story shared by generations.', specs: 'Limited Edition', lore: 'The Sylvan deities (Umang Lai) protect the sacred groves of the valley. This design pays homage to the vibrant Lai Haraoba festival, a mirror to the cosmos where gods and men dance together to renew creation.' },
+            { id: 'PE_004', name: 'Siroi Shadow Tee', price: '849', image: 'BLACK.png', category: 'Scroll', description: 'Honoring the hills. A silhouette of the Siroi Lily.', specs: '240 GSM Luxury Cotton', lore: 'Found only on the peaks of Shirui Kashong in Ukhrul, the Siroi Lily (Shirui Lily) is a testament to the resilient beauty of the Tangkhul heritage. It cannot be transplanted, blooming only where its roots truly belong.' },
+            { id: 'PE_005', name: 'Khuado Peak Hoodie', price: '1499', image: 'BLACK.png', category: 'Guardian', description: 'Inspired by the harvest festivals of the Kuki tribes.', specs: '440 GSM French Terry', lore: 'Khuado is a time of immense gratitude and community bonding. The geometric lines mimic the traditional shawls, each weave holding a narrative of mountainous survival, unity, and the changing of the seasons.' },
+            { id: 'PE_006', name: 'Pangal Script Tee', price: '799', image: 'BLACK.png', category: 'Scroll', description: 'Calligraphic art celebrating the rich history of the Pangal community.', specs: 'Premium Cotton', lore: 'Arriving in the 17th century, the Pangal (Manipuri Muslim) community brought rich artisanship and tactical knowledge. This script embodies their enduring legacy and seamless integration into the cultural tapestry of the land.' }
         ];
 
-        function renderProducts(data) {
-            const container = document.getElementById('product-container');
-            container.innerHTML = data.map(p => `
-                <div class="product-card reveal group flex flex-col h-full audio-trigger" data-tier="${p.category.toLowerCase()}" 
-                     onclick="openHUD('${p.name}', '${p.specs}', '${p.description}', '${p.id}', '${p.price}', '${p.image}')">
-                    <div class="aspect-[4/5] bg-zinc-950 overflow-hidden mb-16 border-2 border-white/10 relative">
-                        <img src="${p.image}" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000" onerror="this.src='BLACK.png'">
-                    </div>
-                    <div class="flex flex-col flex-grow px-2">
-                        <h3 class="mono font-black text-3xl md:text-5xl uppercase tracking-tighter text-left mb-8 line-clamp-2">${p.name}</h3>
-                        <span class="mono text-6xl md:text-9xl font-black opacity-20 italic">₹${p.price}</span>
-                    </div>
-                    <button class="product-card-btn bg-white text-black mt-24 transition-all flex items-center justify-center gap-10">
-                        <span class="meetei-mayek btn-text-mm font-black">ꯃꯑꯣꯡ</span>
-                        <span class="mono font-black uppercase tracking-widest text-black/30">Details</span>
-                    </button>
-                </div>
-            `).join('');
-            const obs = new IntersectionObserver((entries) => {
-                entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('active'); });
-            }, { threshold: 0.1 });
-            document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+        function parseCSV(str) {
+            const arr = [];
+            let quote = false;
+            for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc == '"') { quote = !quote; continue; }
+                if (cc == ',' && !quote) { ++col; continue; }
+                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+                arr[row][col] += cc;
+            }
+            return arr;
         }
-        renderProducts(products);
 
-        function openHUD(title, specs, desc, id, price, img) {
+        function escapeHTML(str) { return !str ? '' : str.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+        function encodeBase64(str) { return btoa(unescape(encodeURIComponent(str || ''))); }
+        function decodeBase64(str) { return decodeURIComponent(escape(atob(str || ''))); }
+
+        function renderProducts(dataArray) {
+            const container = document.getElementById('product-container');
+            container.innerHTML = ''; 
+            
+            dataArray.forEach((p, index) => {
+                if(!p.id || !p.name) return; 
+                const categoryClass = (p.category || 'scroll').toLowerCase();
+                const imageString = p.image || 'BLACK.png';
+                const imageSrc = imageString.split('|')[0].trim();
+                const staggerDelay = (index % 3) * 150; 
+                
+                const safeLore = encodeBase64(p.lore || '');
+                const stock = getScarcityCount(p.id);
+                
+                const html = `
+                    <!-- The entire card is clickable, no conflicting buttons inside -->
+                    <div class="product-card group flex flex-col reveal h-full interactive-element tilt-card" data-tier="${categoryClass}" style="transition-delay: ${staggerDelay}ms"
+                         onclick="openHUD('${escapeHTML(p.name)}', '${escapeHTML(p.specs)}', '${escapeHTML(p.description)}', '${escapeHTML(p.id)}', '${escapeHTML(p.price)}', '${escapeHTML(imageString)}', '${safeLore}', ${stock})">
+                        <div class="aspect-[4/5] bg-[#0a0a0a] overflow-hidden mb-3 relative border border-white/5 cursor-pointer rounded-sm">
+                            <img src="${imageSrc}" alt="${escapeHTML(p.name)}" class="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105" onerror="this.src='BLACK.png'">
+                            <div class="absolute bottom-4 left-4 mono text-[7px] opacity-0 group-hover:opacity-40 transition-opacity text-white drop-shadow-md hidden md:block">TAP TO VIEW</div>
+                        </div>
+                        <div class="flex flex-col items-start px-1 mb-3 gap-1 flex-grow">
+                            <h3 class="mono font-bold text-[11px] md:text-sm uppercase tracking-widest leading-tight text-left line-clamp-2">${escapeHTML(p.name)}</h3>
+                            <div class="flex justify-between w-full items-center">
+                                <span class="mono text-[11px] md:text-sm font-bold opacity-60">₹${p.price}</span>
+                                <span class="text-red-500 mono text-[8px] md:text-[9px] animate-pulse font-bold">ONLY ${stock} LEFT</span>
+                            </div>
+                        </div>
+                        <div class="haptic-btn btn-outline product-card-btn bg-white text-black py-3 md:py-3 w-full flex items-center justify-center gap-1.5 md:gap-2 transition-all mt-auto border border-white/20 rounded-sm">
+                            <span class="meetei-mayek btn-text-mm font-bold mm-shift">ꯃꯑꯣꯡ</span> 
+                            <span class="mono mm-sub font-bold uppercase tracking-widest btn-text-en text-black/50 leading-none">View Specs</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+            
+            document.querySelectorAll('.product-card.reveal').forEach(el => observer.observe(el));
+        }
+
+        async function initStore() {
+            updateCartBadge();
+            if(!GOOGLE_SHEETS_CSV_URL) {
+                renderProducts(fallbackProducts);
+                return;
+            }
+            try {
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) throw new Error("Network");
+                const csvText = await response.text();
+                const parsedData = parseCSV(csvText);
+                const headers = parsedData[0].map(h => h.toLowerCase().trim());
+                const products = [];
+                for(let i = 1; i < parsedData.length; i++) {
+                    if(parsedData[i].length < 2) continue; 
+                    const obj = {};
+                    headers.forEach((header, index) => { obj[header] = parsedData[i][index]; });
+                    products.push(obj);
+                }
+                renderProducts(products.length > 0 ? products : fallbackProducts);
+            } catch(e) { renderProducts(fallbackProducts); }
+        }
+
+        document.addEventListener('DOMContentLoaded', initStore);
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            
+            const anyOpen = Array.from(document.querySelectorAll('.custom-modal, #size-guide-modal, #lore-modal')).some(m => m.classList.contains('flex'));
+            if(!anyOpen) document.body.style.overflow = '';
+        }
+
+        function openSizeGuide() { openModal('size-guide-modal'); }
+        function openLore() { openModal('lore-modal'); }
+        
+        let currentCarouselImages = [];
+        
+        function openHUD(title, specs, desc, id, price, imageString, safeLore, stock) {
             document.getElementById('hud-title').innerText = title;
             document.getElementById('hud-specs').innerText = specs;
             document.getElementById('hud-desc').innerText = desc;
             document.getElementById('hud-id').innerText = id;
             document.getElementById('hud-price').innerText = `₹${price}`;
-            document.getElementById('hud-carousel').innerHTML = `<img src="${img}" class="w-full h-full object-cover" onerror="this.src='BLACK.png'">`;
-            document.getElementById('hud-add-cart-btn').onclick = () => { addToCart(title, price, id); closeModal('hud-modal'); };
-            openModal('hud-modal');
-        }
-
-        let cart = [];
-        function addToCart(n, p, id) { cart.push({ n, p }); updateBadge(); }
-        function updateBadge() {
-            const b = document.getElementById('cart-badge');
-            b.innerText = cart.length; b.classList.toggle('hidden', cart.length === 0);
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById(id).classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            document.getElementById(id).classList.remove('flex');
-            document.body.style.overflow = '';
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false });
-            document.getElementById('live-clock').innerText = `[ ${time} IST ]`;
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        function filterTier(t) {
-            const btns = document.querySelectorAll('.tier-btn');
-            btns.forEach(b => b.classList.toggle('active', b.innerText.toLowerCase().includes(t)));
-            document.querySelectorAll('.product-card').forEach(p => {
-                p.style.display = (t === 'all' || p.getAttribute('data-tier') === t) ? 'flex' : 'none';
+            
+            // Set Scarcity Text
+            document.getElementById('hud-scarcity-mm').innerText = `ꯂꯦꯝꯍꯧꯔꯤꯕ: ꯰${stock}`;
+            document.getElementById('hud-scarcity-en').innerText = `ONLY ${stock} LEFT IN ARCHIVE`;
+            
+            const loreText = decodeBase64(safeLore);
+            const loreBtn = document.getElementById('hud-lore-btn');
+            if (loreText && loreText.trim() !== '') {
+                document.getElementById('lore-content').innerHTML = `<p class="mb-4 font-bold uppercase tracking-widest text-white/50 border-b border-white/10 pb-4 text-sm">ARCHIVE ENTRY: ${id}</p><p>${loreText.replace(/\n/g, '<br/><br/>')}</p>`;
+                loreBtn.classList.remove('hidden');
+                loreBtn.classList.add('flex'); 
+            } else {
+                loreBtn.classList.add('hidden');
+                loreBtn.classList.remove('flex');
+            }
+            
+            currentCarouselImages = imageString.split('|').map(s => s.trim());
+            const carousel = document.getElementById('hud-carousel');
+            const dotsContainer = document.getElementById('hud-dots');
+            carousel.innerHTML = '';
+            dotsContainer.innerHTML = '';
+            
+            currentCarouselImages.forEach((src, idx) => {
+                carousel.innerHTML += `<img src="${src}" class="w-full h-full object-cover flex-shrink-0 snap-center" onerror="this.src='BLACK.png'">`;
+                dotsContainer.innerHTML += `<div class="w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx===0 ? 'bg-white w-4' : 'bg-white/40'}" id="dot-${idx}"></div>`;
             });
+            
+            carousel.onscroll = () => {
+                const scrollPos = carousel.scrollLeft;
+                const width = carousel.clientWidth;
+                const activeIndex = Math.round(scrollPos / width);
+                
+                currentCarouselImages.forEach((_, idx) => {
+                    const dot = document.getElementById(`dot-${idx}`);
+                    if (dot) dot.className = `h-1.5 rounded-full transition-all duration-300 ${idx === activeIndex ? 'bg-white w-4' : 'bg-white/40 w-1.5'}`;
+                });
+
+                const leftBtn = document.getElementById('carousel-left-btn');
+                const rightBtn = document.getElementById('carousel-right-btn');
+                if(leftBtn && rightBtn) {
+                    leftBtn.style.opacity = activeIndex === 0 ? '0' : '';
+                    leftBtn.style.pointerEvents = activeIndex === 0 ? 'none' : 'auto';
+                    rightBtn.style.opacity = activeIndex === currentCarouselImages.length - 1 ? '0' : '';
+                    rightBtn.style.pointerEvents = activeIndex === currentCarouselImages.length - 1 ? 'none' : 'auto';
+                }
+            };
+            
+            const addBtn = document.getElementById('hud-add-cart-btn');
+            addBtn.onclick = (e) => {
+                e.preventDefault();
+                // Interactive Button Sequence
+                const mmSpan = addBtn.querySelector('.meetei-mayek');
+                const enSpan = addBtn.querySelector('.mono');
+                mmSpan.innerText = 'ꯄ꯭ꯔꯣꯁꯦꯁ'; // Process
+                enSpan.innerText = 'PROCESSING...';
+                
+                setTimeout(() => {
+                    addToCart({ id, name: title, price: parseInt(price), image: currentCarouselImages[0] });
+                    mmSpan.innerText = 'ꯍꯥꯞꯆꯤꯟꯕ'; // Add to Bag
+                    enSpan.innerText = 'Add to Bag';
+                }, 800);
+            };
+            
+            openModal('hud-modal');
+            setTimeout(() => { carousel.scrollLeft = 0; carousel.onscroll(); }, 10);
         }
+
+        function scrollCarousel(direction) {
+            const carousel = document.getElementById('hud-carousel');
+            const width = carousel.clientWidth;
+            carousel.scrollBy({ left: width * direction, behavior: 'smooth' });
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            const count = cart.length;
+            badge.innerText = count;
+            badge.classList.toggle('hidden', count === 0);
+        }
+
+        function addToCart(product) {
+            cart.push(product);
+            try { localStorage.setItem('pe_cart', JSON.stringify(cart)); } catch(e) { console.warn("Storage restricted."); }
+            updateCartBadge();
+            showToast('ARTIFACT SECURED');
+            closeModal('hud-modal');
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            try { localStorage.setItem('pe_cart', JSON.stringify(cart)); } catch(e) { console.warn("Storage restricted."); }
+            updateCartBadge();
+            renderCart();
+        }
+
+        function openCart() {
+            renderCart();
+            openModal('cart-modal');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            container.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="mono text-xs opacity-40 text-center py-10 uppercase tracking-widest">Bag is Empty</p>';
+                totalEl.innerText = '₹0';
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                container.innerHTML += `
+                    <div class="flex gap-4 items-center border border-white/10 p-3 bg-white/[0.02] rounded-sm interactive-element">
+                        <img src="${item.image}" class="w-16 h-20 object-cover grayscale opacity-80" onerror="this.src='BLACK.png'">
+                        <div class="flex-1 flex flex-col overflow-hidden">
+                            <span class="mono text-[11px] font-bold uppercase tracking-widest leading-tight text-white mb-1 truncate">${escapeHTML(item.name)}</span>
+                            <span class="mono text-[10px] opacity-50 uppercase">${escapeHTML(item.id)}</span>
+                            <span class="mono text-[12px] font-bold mt-2">₹${item.price}</span>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="opacity-40 hover:opacity-100 p-4 cursor-pointer audio-trigger interactive-element"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+                    </div>
+                `;
+            });
+            totalEl.innerText = `₹${total}`;
+        }
+
+        function checkoutCart() {
+            if (cart.length === 0) { showToast("BAG IS EMPTY"); return; }
+            
+            const btn = document.getElementById('checkout-btn');
+            btn.innerHTML = `<span class="mono font-black uppercase text-[12px] tracking-[0.2em] text-black">CONNECTING...</span>`;
+            
+            setTimeout(() => {
+                let orderText = `ꯈꯨꯔꯨꯝꯖꯔꯤ | [ BULK ORDER INITIATED ]\n\n`;
+                let total = 0;
+                cart.forEach((item, index) => {
+                    orderText += `${index + 1}. ${item.name} (ID: ${item.id}) - ₹${item.price}\n`;
+                    total += item.price;
+                });
+                orderText += `\nTOTAL ESTIMATE: ₹${total}\nStatus: Awaiting Size Confirmation & Payment link.`;
+                
+                try { localStorage.removeItem('pe_cart'); } catch(e) {}
+                cart = [];
+                updateCartBadge();
+                closeModal('cart-modal');
+                
+                // Reset Button HTML
+                btn.innerHTML = `<span class="meetei-mayek text-[16px] font-bold mm-shift text-black">ꯂꯩꯕ</span> <span class="mono font-black uppercase text-[12px] tracking-[0.2em] text-black/50 leading-none ml-1">Checkout</span>`;
+                
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(orderText)}`, '_blank');
+            }, 800);
+        }
+
+        function filterTier(tier) {
+            const products = document.querySelectorAll('.product-card');
+            const buttons = document.querySelectorAll('.tier-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${tier}'`)) btn.classList.add('active');
+            });
+            products.forEach(p => { p.style.display = (tier === 'all' || p.getAttribute('data-tier') === tier) ? 'flex' : 'none'; });
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-white text-black px-6 py-4 mono text-[12px] uppercase font-bold tracking-widest flex items-center gap-3 toast-animate shadow-2xl rounded-sm';
+            toast.innerHTML = `<span class="meetei-mayek text-base mm-align">ꯄ꯭ꯔꯣꯖꯦꯛꯠ</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        }
+
+        document.getElementById('newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            this.querySelector('input').value = '';
+            showToast('WELCOME TO THE COMMUNITY.');
+        });
+
+        // AI ORACLE
+        const apiKey = "";
+        const aiForm = document.getElementById('ai-form');
+        const aiInput = document.getElementById('ai-input');
+        const chatHistory = document.getElementById('chat-history');
+        const aiTyping = document.getElementById('ai-typing');
+
+        async function fetchAIResponse(userPrompt) {
+            const systemPrompt = `You are the Heritage Oracle for Project Eramdam, an art and streetwear brand. Tone: Professional, poetic, and unifying. Address all cultures of Manipur (Meitei, Tangkhul, Kuki, Pangal, etc.) with equal respect. STRICT RULE: Remain absolutely neutral. Do not mention political borders, recent conflicts, or divisive regional names. Focus ONLY on folklore, fashion, art, and unity. Max 2 paragraphs. No emojis.`;
+            
+            // EASTER EGG OVERRIDE
+            if(userPrompt.toUpperCase().includes('ERAMDAM') || userPrompt.toUpperCase().includes('KANGLEIPAK')) {
+                return "The roots run deep. Before the threads are woven, the story must be known. We are remembering who we are.";
+            }
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: userPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } })
+                });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "System sync lost. Try again.";
+            } catch (err) { return "Handshake failed."; }
+        }
+
+        aiForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = aiInput.value.trim();
+            if (!text) return;
+            aiInput.value = '';
+            const userDiv = document.createElement('div');
+            userDiv.className = "bg-white text-black p-4 self-end ml-auto uppercase text-[12px] font-bold w-fit max-w-[90%] mono rounded-sm";
+            userDiv.textContent = text;
+            chatHistory.appendChild(userDiv);
+            aiTyping.classList.remove('hidden');
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+            
+            const reply = await fetchAIResponse(text);
+            aiTyping.classList.add('hidden');
+            const aiDiv = document.createElement('div');
+            aiDiv.className = "bg-white/5 p-4 border-l-2 border-white/20 self-start mr-auto w-fit max-w-[90%] mono opacity-80 leading-loose rounded-sm text-[12px]";
+            aiDiv.textContent = reply;
+            chatHistory.appendChild(aiDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        });
     </script>
 </body>
 </html>
